@@ -13,7 +13,8 @@ var app = app || {};
 
 window.onload = function(){
 	console.log("window.onload called");
-
+	//debugger;
+	app.rocket.init();
 	app.main.init();
 	
 };
