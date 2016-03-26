@@ -24,6 +24,7 @@ var app = app || {};
 	animationID: 0,
 	HEIGHT: 500,
 	WIDTH: 500,
+	lastTime:0, //Used by calculateDeltaTime()
 	grd: undefined,
 	
 	
@@ -52,14 +53,43 @@ var app = app || {};
 		//requestAnimationFrame(this.update.bind(this));
 		this.animationID = requestAnimationFrame(this.update.bind(this));
 		
+		//get deltaTime
+		var dt = this.calculateDeltaTime();
 		
 		//update
-		app.rocket.update();
+		app.rocket.update(dt);
 		
 		// 5) DRAW	
 		// i) draw background
+		this.ctx.save();
 		this.ctx.fillStyle = this.grd; 
 		this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+		this.ctx.restore();
+		
+		//draw rocket
 		app.rocket.draw(this.ctx);
-	}
+	},
+	
+		calculateDeltaTime: function(){
+		// what's with (+ new Date) below?
+		// + calls Date.valueOf(), which converts it from an object to a 	
+		// primitive (number of milliseconds since January 1, 1970 local time)
+		var now,fps;
+		now = (+new Date); 
+		fps = 1000 / (now - this.lastTime);
+		fps = clamp(fps, 12, 60);
+		this.lastTime = now; 
+		return 1/fps;
+	},
  }
+ 
+ /*
+Function Name: clamp(val, min, max)
+Author: Web - various sources
+Return Value: the constrained value
+Description: returns a value that is
+constrained between min and max (inclusive) 
+*/
+function clamp(val, min, max){
+	return Math.max(min, Math.min(max, val));
+}
