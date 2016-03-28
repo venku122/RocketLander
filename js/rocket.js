@@ -13,29 +13,39 @@ var app = app || {};
 var GRAVITY = new Victor(0,9.81);
  app.rocket = {
 	 
+	 //vehicle state
 	 width: 3.66,
 	 height: 41.2,
-	 rotation: 70,
+	 rotation: 0,
 	 massInitial: 409.5,
 	 massFinal: 22.2,
+	 centerOfMass: new Victor(0, this.height/3 * 2),
+	 
+	 //engine state
 	 //thrust: .756
 	 thrust: new Victor(0,-756),
 	 thrustAccel: undefined,
 	 throttle: 1.0,
 	 MIN_THROTTLE: .55,
 	 MAX_THROTTLE: 1.0,
+	 GIMBAL_RANGE: 10,
+	 
+	 //kinematic state
 	 position: new Victor(0,0),
 	 velocity: new Victor(0,0),
 	 acceleration: new Victor(0,0),
+	 
+	 //api variables
 	 ctx: undefined,
 	 debug: true,
+	 SCALE_FACTOR: 1.5,
 	 
 	 init : function(){
 		 //debugger;
 		 console.log("app.rocket.init() called");
 		 this.position = new Victor(100,200);
 		 this.velocity = new Victor(0,0);
-		 
+		 this.centerOfMass = new Victor(0, this.height /3 *2);
 		 
 	 },
 	 
@@ -43,6 +53,49 @@ var GRAVITY = new Victor(0,9.81);
 	 draw : function(ctx){
 		 
 		 
+		 
+		 if(this.debug){
+			ctx.save();
+			ctx.translate(this.position.x, this.position.y);
+			
+			//free body diagram
+			//block
+			ctx.fillRect(-5,-5,10,10);
+			
+			//velocity debug line
+			 ctx.beginPath();
+			 ctx.strokeStyle="yellow";
+			 ctx.moveTo(0,0);
+			 ctx.lineTo(this.velocity.x, this.velocity.y);
+			 ctx.stroke();
+			 
+			//acceleration debug line
+			 ctx.beginPath();
+			 ctx.strokeStyle="green";
+			 ctx.moveTo(0,0);
+			 ctx.lineTo(this.acceleration.x*this.SCALE_FACTOR, this.acceleration.y*this.SCALE_FACTOR);
+			 ctx.stroke();
+			 
+			 //thrust debug line
+			 //inverted to ve more "logical"
+			 ctx.beginPath();
+			 ctx.strokeStyle="orange";
+			 ctx.moveTo(0,0);
+			 ctx.lineTo(-this.thrustAccel.x*this.SCALE_FACTOR, -this.thrustAccel.y*this.SCALE_FACTOR);
+			 ctx.stroke();
+			 
+			 
+			 //gravity debug line
+			 ctx.beginPath();
+			 ctx.strokeStyle="black";
+			 ctx.moveTo(0,0);
+			 ctx.lineTo(GRAVITY.x*this.SCALE_FACTOR, GRAVITY.y*this.SCALE_FACTOR);
+			 ctx.stroke();
+			 
+			 ctx.restore();
+		 }
+		 else
+		 {
 		 ctx.save();
 		 ctx.fillStyle="red";
 		 ctx.translate(this.position.x, this.position.y);
@@ -56,39 +109,6 @@ var GRAVITY = new Victor(0,9.81);
 		 ctx.fillRect(this.width-18, this.height, 18,3);
 		 
 		 ctx.restore();
-		 if(this.debug){
-			ctx.save();
-			ctx.translate(this.position.x, this.position.y);
-			//acceleration debug line
-			 ctx.beginPath();
-			 ctx.strokeStyle="green";
-			 ctx.moveTo(0,0);
-			 ctx.lineTo(this.acceleration.x, this.acceleration.y);
-			 ctx.stroke();
-			 
-			 //velocity debug line
-			 ctx.beginPath();
-			 ctx.strokeStyle="yellow";
-			 ctx.moveTo(0,0);
-			 ctx.lineTo(this.velocity.x, this.velocity.y);
-			 ctx.stroke();
-			 
-			 //thrust debug line
-			 ctx.beginPath();
-			 ctx.strokeStyle="orange";
-			 ctx.moveTo(0,0);
-			 ctx.lineTo(this.thrustAccel.x, this.thrustAccel.y);
-			 ctx.stroke();
-			 
-			 
-			 //gravity debug line
-			 ctx.beginPath();
-			 ctx.strokeStyle="black";
-			 ctx.moveTo(0,0);
-			 ctx.lineTo(GRAVITY.x, GRAVITY.y);
-			 ctx.stroke();
-			 
-			 ctx.restore();
 		 }
 		 
 		 
@@ -97,7 +117,7 @@ var GRAVITY = new Victor(0,9.81);
 	 
 	 update : function(dt){
 		 
-		 this.rotation+=0.5;
+		 //this.rotation+=0.5;
 		 //reset accelerations
 		 this.acceleration=new Victor(0,0);
 		 //add accelerations
@@ -105,7 +125,10 @@ var GRAVITY = new Victor(0,9.81);
 		 this.acceleration.add(GRAVITY);
 		 
 		 //calculate thrust force
-		 this.thrustAccel = this.thrust.clone().multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal).rotateByDeg(this.rotation);
+		 //debugger;
+		 this.thrustAccel = this.thrust.clone().rotateDeg(this.GIMBAL_RANGE).multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
+		 //this.thrustAccel = this.thrust.clone().multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
+
 		 this.acceleration.add(this.thrustAccel);
 		 console.log("Acceleration due to thrust: " + this.thrustAccel);
 		 
@@ -115,6 +138,24 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 //update position
 		 this.position.add(this.velocity.clone().multiplyScalar(dt));
+	 },
+	 
+	 borderCheck : function(){
+		 if(this.position.x> app.main.WIDTH){
+			 console.log("Out of Bounds");
+		 }
+		 
+		 if(this.position.y> app.main.HEIGHT){
+			 console.log("Out of Bounds");
+		 }
+		 
+		 if(this.position.x<0){
+			 console.log("Out of Bounds");
+		 }
+		 
+		 if(this.position.y<0){
+			 console.log("Out of Bounds");
+		 }
 	 }
 	 
  }
