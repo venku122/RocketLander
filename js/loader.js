@@ -14,6 +14,7 @@ var app = app || {};
 window.onload = function(){
 	console.log("window.onload called");
 	//debugger;
+	Draw.init();
 	app.rocket.init();
 	app.main.init();
 	

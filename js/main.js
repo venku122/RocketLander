@@ -26,15 +26,29 @@ var app = app || {};
 	WIDTH: 500,
 	lastTime:0, //Used by calculateDeltaTime()
 	grd: undefined,
+	mountainPeaks: [],
 	
 	
 	init : function(){
 		console.log("app.main.init() called");
 		// initialize properties
-		this.canvas = document.querySelector('canvas');
-		this.canvas.width = this.WIDTH;
-		this.canvas.height = this.HEIGHT;
+		this.canvas = Draw.canvas;
+		this.WIDTH = Draw.canvas.width;
+		this.HEIGHT = Draw.canvas.height;
+		//this.canvas.width = this.WIDTH;
+		//this.canvas.height = this.HEIGHT;
 		this.ctx = this.canvas.getContext('2d');
+		/*var y = this.HEIGHT - 1;
+		this.ctx.moveTo(0, y);
+		for (var x = 0; x < this.WIDTH / 15; x += this.WIDTH / 15) {
+			var noise = perlin(x, y);
+			xPos = map_range(noise, 0, 1, 0, this.WIDTH);
+			y = map_range(noise, 0, 1, 0, this.HEIGHT);
+			//ctx.lineTo(xPos, y);
+		}*/
+		
+		var noise = perlin(0, 0);
+		noise = perlin(5, 0);
 		
 		
 		//set gradient
@@ -66,11 +80,17 @@ var app = app || {};
 		this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
 		this.ctx.restore();
 		
+		this.ctx.save();
+		this.ctx.beginPath();
+		
+		this.ctx.stroke();
+		this.ctx.restore();
+		
 		//draw rocket
 		app.rocket.draw(this.ctx);
 	},
 	
-		calculateDeltaTime: function(){
+	calculateDeltaTime: function(){
 		// what's with (+ new Date) below?
 		// + calls Date.valueOf(), which converts it from an object to a 	
 		// primitive (number of milliseconds since January 1, 1970 local time)
@@ -80,7 +100,7 @@ var app = app || {};
 		fps = clamp(fps, 12, 60);
 		this.lastTime = now; 
 		return 1/fps;
-	},
+	}
  }
  
  /*
