@@ -18,6 +18,15 @@ var app = app || {};
  app.main = {
 	 
 	 
+	 //Game State Machine
+	GAME_STATE: Object.freeze({
+		START: 0,
+		DEFAULT: 1,
+		LANDED: 2,
+		DESTROYED: 3,
+		OPTIONS: 4
+	}),
+	
 	 //Properties
 	canvas: undefined,
     ctx: undefined,
@@ -27,7 +36,7 @@ var app = app || {};
 	lastTime:0, //Used by calculateDeltaTime()
 	grd: undefined,
 	mountainPeaks: [],
-	
+	state: this.GAME_STATE.START,
 	
 	init : function(){
 		console.log("app.main.init() called");
@@ -49,7 +58,7 @@ var app = app || {};
 		
 		var noise = perlin(0, 0);
 		noise = perlin(5, 0);
-		
+		this.state= GAME_STATE.DEFAULT;
 		
 		//set gradient
 		this.grd = this.ctx.createLinearGradient(0,0,0, this.HEIGHT),
@@ -67,6 +76,29 @@ var app = app || {};
 		//requestAnimationFrame(this.update.bind(this));
 		this.animationID = requestAnimationFrame(this.update.bind(this));
 		
+		
+		switch(this.state){
+			
+			case GAME_STATE.DEFAULT:
+			
+			//get deltaTime
+			var dt = this.calculateDeltaTime();
+			
+			//update
+			app.rocket.update(dt);
+			
+			// 5) DRAW	
+			// i) draw background
+			this.ctx.save();
+			this.ctx.fillStyle = this.grd; 
+			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+			this.ctx.restore();
+			
+			//draw rocket
+			app.rocket.draw(this.ctx);
+			
+			break;
+		}
 		//get deltaTime
 		var dt = this.calculateDeltaTime();
 		
