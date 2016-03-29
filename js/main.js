@@ -18,6 +18,15 @@ var app = app || {};
  app.main = {
 	 
 	 
+	 //Game State Machine
+	GAME_STATE: Object.freeze({
+		START: 0,
+		DEFAULT: 1,
+		LANDED: 2,
+		DESTROYED: 3,
+		OPTIONS: 4
+	}),
+	
 	 //Properties
 	canvas: undefined,
     ctx: undefined,
@@ -26,6 +35,9 @@ var app = app || {};
 	WIDTH: 500,
 	lastTime:0, //Used by calculateDeltaTime()
 	grd: undefined,
+	state: this.GAME_STATE.START,
+	
+	
 	
 	
 	init : function(){
@@ -35,7 +47,7 @@ var app = app || {};
 		this.canvas.width = this.WIDTH;
 		this.canvas.height = this.HEIGHT;
 		this.ctx = this.canvas.getContext('2d');
-		
+		this.state= GAME_STATE.DEFAULT;
 		
 		//set gradient
 		this.grd = this.ctx.createLinearGradient(0,0,0, this.HEIGHT),
@@ -53,6 +65,29 @@ var app = app || {};
 		//requestAnimationFrame(this.update.bind(this));
 		this.animationID = requestAnimationFrame(this.update.bind(this));
 		
+		
+		switch(this.state){
+			
+			case GAME_STATE.DEFAULT:
+			
+			//get deltaTime
+			var dt = this.calculateDeltaTime();
+			
+			//update
+			app.rocket.update(dt);
+			
+			// 5) DRAW	
+			// i) draw background
+			this.ctx.save();
+			this.ctx.fillStyle = this.grd; 
+			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+			this.ctx.restore();
+			
+			//draw rocket
+			app.rocket.draw(this.ctx);
+			
+			break;
+		}
 		//get deltaTime
 		var dt = this.calculateDeltaTime();
 		
