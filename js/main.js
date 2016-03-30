@@ -36,7 +36,7 @@ var app = app || {};
 	lastTime:0, //Used by calculateDeltaTime()
 	grd: undefined,
 	mountainPeaks: [],
-	state: this.GAME_STATE.START,
+	state: null,
 	
 	init : function(){
 		console.log("app.main.init() called");
@@ -47,18 +47,10 @@ var app = app || {};
 		//this.canvas.width = this.WIDTH;
 		//this.canvas.height = this.HEIGHT;
 		this.ctx = this.canvas.getContext('2d');
-		/*var y = this.HEIGHT - 1;
-		this.ctx.moveTo(0, y);
-		for (var x = 0; x < this.WIDTH / 15; x += this.WIDTH / 15) {
-			var noise = perlin(x, y);
-			xPos = map_range(noise, 0, 1, 0, this.WIDTH);
-			y = map_range(noise, 0, 1, 0, this.HEIGHT);
-			//ctx.lineTo(xPos, y);
-		}*/
 		
-		var noise = perlin(0, 0);
-		noise = perlin(5, 0);
-		this.state= GAME_STATE.DEFAULT;
+		this.state = this.GAME_STATE.DEFAULT;
+		
+		this.generatePeaks(this.HEIGHT / 3 * 2);
 		
 		//set gradient
 		this.grd = this.ctx.createLinearGradient(0,0,0, this.HEIGHT),
@@ -79,7 +71,7 @@ var app = app || {};
 		
 		switch(this.state){
 			
-			case GAME_STATE.DEFAULT:
+			case this.GAME_STATE.DEFAULT:
 			
 			//get deltaTime
 			var dt = this.calculateDeltaTime();
@@ -113,13 +105,31 @@ var app = app || {};
 		this.ctx.restore();
 		
 		this.ctx.save();
+		
 		this.ctx.beginPath();
 		
+		this.ctx.moveTo(0, this.mountainPeaks[0]);
+		for (var x = 0; x < this.WIDTH; x++) {
+			var noise = perlin(x, 50);
+			
+			//this.ctx.lineTo(map_range(x, 0, perlinSize, 0, this.WIDTH), y += (noise * 2 * (Math.random() > .5 ? 1 : -1)));
+			this.ctx.lineTo(x, this.mountainPeaks[x]);
+		}
 		this.ctx.stroke();
 		this.ctx.restore();
 		
 		//draw rocket
 		app.rocket.draw(this.ctx);
+	},
+	
+	generatePeaks: function(startY){
+		this.mountainPeaks = new Array(this.width);
+		var y = startY;
+		for (var x = 0; x < this.WIDTH; x += 5) {
+			var noise = perlin(x, 50);
+			this.mountainPeaks[x] = y;
+			y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
+		}
 	},
 	
 	calculateDeltaTime: function(){
