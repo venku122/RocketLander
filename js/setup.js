@@ -7,7 +7,7 @@
  */
 
 window.Draw = {
-  canvas:  document.getElementByID( 'mainCanvas' );,
+  canvas:  document.getElementById( 'mainCanvas' ),
   ctx:     null,     
   width:   window.innerWidth,
   height:  window.innerHeight,

@@ -104,7 +104,7 @@ var app = app || {};
 		this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
 		this.ctx.restore();
 		
-		this.ctx.save();
+		//this.ctx.save();
 		
 		this.ctx.beginPath();
 		
@@ -120,6 +120,8 @@ var app = app || {};
 		
 		//draw rocket
 		app.rocket.draw(this.ctx);
+		
+		render();
 	},
 	
 	generatePeaks: function(startY){

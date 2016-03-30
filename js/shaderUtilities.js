@@ -2,29 +2,10 @@
 
 var texture;
 
+var canvas;
 var gl;
 var textureCanvas
-
-function initWebGL(canvasID, glCanvasID) {
-	var canvas = document.getElementByID( glCanvasID );
-	gl = canvas.getContext( 'webgl' );
-	
-	textureCanvas = document.getElementById( canvasID );
-	var textureCtx = textureCanvas.getContext( '2d' );
-	
-	canvas.width = textureCanvas.width;
-	canvas.height = textureCanvas.height;
-	
-	// define drawing area of canvas. Bottom corner, width / height
-	gl.viewport( 0, 0, gl.drawingBufferWidth * 2, gl.drawingBufferHeight * 2);
-	
-	// Create a bugger object to store vertices
-	buffer  = gl.createBuffer();
-	
-	// point buffer at graphic context's ARRAY_BUFFER
-	gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
-	
-	var triangles = new Float32Array([
+var triangles = new Float32Array([
 		-1, -1,
 		1, -1,
 		-1, 1,
@@ -32,6 +13,28 @@ function initWebGL(canvasID, glCanvasID) {
 		1, -1,
 		1, 1
 	])
+
+function initWebGL(canvasID, glCanvasID) {
+	canvas = document.getElementById( glCanvasID );
+	gl = canvas.getContext( 'webgl' );
+	
+	textureCanvas = document.getElementById( canvasID );
+	var textureCtx = textureCanvas.getContext( '2d' );
+	
+	textureCanvas.width  = 1024,
+    textureCanvas.height = 1024
+	textureCanvas.style.display = 'none';
+	canvas.width = textureCanvas.width;
+	canvas.height = textureCanvas.height;
+	
+	// define drawing area of canvas. Bottom corner, width / height
+	gl.viewport( 0, 0, gl.drawingBufferWidth * 2, gl.drawingBufferHeight * 2);
+	
+	// Create a bugger object to store vertices
+	var buffer  = gl.createBuffer();
+	
+	// point buffer at graphic context's ARRAY_BUFFER
+	gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
 	
 	// initialize memory for buffer and populate it. Give
 	// WebGL hint contents will not change dynamically.
@@ -44,9 +47,9 @@ function initWebGL(canvasID, glCanvasID) {
 	gl.compileShader( vertexShader );
 	
 	// create fragment shader
-	var fragmentSource = fragement_shader; // from shader.js
-	var fragmentShader = gl.createShader( gl.VERTEX_SHADER );
-	gl.shaderSource( fragementShader, fragmentSource );
+	var fragmentSource = fragment_shader; // from shader.js
+	var fragmentShader = gl.createShader( gl.FRAGMENT_SHADER );
+	gl.shaderSource( fragmentShader, fragmentSource );
 	gl.compileShader( fragmentShader);
 	
 	//creaqte a shader program
@@ -77,10 +80,10 @@ function initWebGL(canvasID, glCanvasID) {
 }
 
 function getTexture() {
-	gl.pixelStorei(gl.UNPCAK_FLIP_Y_WEBGL, true);
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 	
 	gl.bindTexture( gl.TEXTURE_2D, texture );
-	gl.textImage2D(
+	gl.texImage2D(
 		gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textureCanvas
 	)
 	
@@ -94,6 +97,17 @@ function webGLSetup() {
 	gl.clear( gl.COLOR_BUFFER_BIT );
 	
 	gl.activeTexture( gl.TEXTURE0);
+}
+
+function render() {
+		//window.requestAnimationFrame(render, canvas);
+		
+		webGLSetup();
+		
+		getTexture();
+		
+		gl.drawArrays( gl.TRIANGLES, 0, 6 );
+
 }
 
 
