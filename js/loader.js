@@ -15,6 +15,7 @@ window.onload = function(){
 	console.log("window.onload called");
 	//debugger;
 	Draw.init();
+	initWebGL('mainCanvas', 'gl');
 	app.rocket.init();
 	app.main.init();
 	
