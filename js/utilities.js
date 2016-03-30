@@ -114,18 +114,15 @@ Array.prototype.randomElement = function(){
 	return this[Math.floor(Math.random() * this.length)];
 }
 
-var perlin2D = null;
+var perlinSize = 10000;
+var xMax = map_range(Math.random(), 0, 1, 0, 100);
+var yMax = map_range(Math.random(), 0, 1, 0, 100);
 
-function initPerlin(yMax, xMax) {
-	perlin2D = new Array(yMax);
-	for (var y = 0; y < yMax; y++) {
-		perlin2D[y] = new Array(xMax);
-		for (var x = 0; x < xMax; x++) {
-				perlin2D[y][x] = new Array(2);
-				perlin2D[y][x][0] = map_range(Math.random(), 0, 1, -1, 1);
-				perlin2D[y][x][1] = map_range(Math.random(), 0, 1, -1, 1);
-		}
-	}
+function gradientNode(x, y) {
+	var gradientVector = {};
+	gradientVector.x = map_range(1 - Math.abs(x - xMax) / perlinSize, 0, perlinSize, -1, 1);
+	gradientVector.y = map_range(1 - Math.abs(x - yMax) / perlinSize, 0, perlinSize, -1, 1);
+	return gradientVector;
 }
 
 // Function to linearly interpolate between a0 and a1
@@ -140,14 +137,11 @@ function initPerlin(yMax, xMax) {
      var dx = x - ix;
      var dy = y - iy;
 
-	 console.log(iy + "," + ix);
-     return (dx*perlin2D[iy][ix][0] + dy*perlin2D[iy][ix][1]);
+	 var nodeVector = gradientNode(ix, iy);
+     return (dx * nodeVector.x + dy * nodeVector.y);
  }
 
 function perlin(x, y) {
-	if(perlin2D == null) {
-		initPerlin(10, 10);
-	}
 
 	 // Determine grid cell coordinates
 	var x0 = (x > 0.0 ? x : x - 1);
@@ -167,10 +161,10 @@ function perlin(x, y) {
 	ix0 = lerp(n0, n1, sx);
 	n0 = dotGridGradient(x0, y1, x, y);
 	n1 = dotGridGradient(x1, y1, x, y);
-	ix1 = lerp(n0, n1, sx);
-	value = lerp(ix0, ix1, sy);
+	ix1 = lerp(n0, n1, 1);
+	value = lerp(ix0, ix1, 1);
  
-	return value;
+	return value - 1;
 }
 
 
