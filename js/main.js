@@ -36,7 +36,7 @@ var app = app || {};
 	lastTime:0, //Used by calculateDeltaTime()
 	grd: undefined,
 	mountainPeaks: [],
-	state: this.GAME_STATE.START,
+	state: undefined,
 	
 	init : function(){
 		console.log("app.main.init() called");
@@ -56,9 +56,12 @@ var app = app || {};
 			//ctx.lineTo(xPos, y);
 		}*/
 		
+		/*
 		var noise = perlin(0, 0);
 		noise = perlin(5, 0);
 		this.state= GAME_STATE.DEFAULT;
+		*/
+		
 		
 		//set gradient
 		this.grd = this.ctx.createLinearGradient(0,0,0, this.HEIGHT),
@@ -79,7 +82,7 @@ var app = app || {};
 		
 		switch(this.state){
 			
-			case GAME_STATE.DEFAULT:
+			case this.GAME_STATE.DEFAULT:
 			
 			//get deltaTime
 			var dt = this.calculateDeltaTime();
