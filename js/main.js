@@ -35,6 +35,7 @@ var app = app || {};
 	 //Properties
 	canvas: undefined,
     ctx: undefined,
+	debug: false,
 	animationID: 0,
 	HEIGHT: 500,
 	WIDTH: 500,
@@ -48,7 +49,7 @@ var app = app || {};
 	clearHeight: 0,
 	
 	init : function(){
-		console.log("app.main.init() called");
+		if(this.debug) console.log("app.main.init() called");
 		// initialize properties
 		this.canvas = Draw.canvas;
 		this.WIDTH = Draw.canvas.width;
@@ -78,6 +79,10 @@ var app = app || {};
 		//requestAnimationFrame(this.update.bind(this));
 		this.animationID = requestAnimationFrame(this.update.bind(this));
 		
+		if(myKeys.keydown[myKeys.KEYBOARD.KEY_U]){
+			this.debug=!this.debug;
+			app.rocket.debug = this.debug;
+		} 
 		
 		switch(this.state){
 			
@@ -88,12 +93,8 @@ var app = app || {};
 			this.ctx.fillStyle = this.grd; 
 			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
 			this.ctx.restore();
-			
-			//draw menu text
-			this.ctx.font=" 40px monospace";
-			this.ctx.textAlign = "center";
-			this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
-			this.ctx.fillText("Press E to start", this.WIDTH/2,this.HEIGHT/2 )
+			this.drawUI();
+
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_E]) this.state = this.GAME_STATE.DEFAULT;
 			
 			
@@ -120,7 +121,7 @@ var app = app || {};
 			
 			app.rocket.update(dt);
 			
-			if(app.rocket.position.y > this.clearHeight){
+			if(app.rocket.position.y > this.clearHeight - app.rocket.height){
 				if( !this.didLandSafely(app.rocket) || this.timer != null){
 					shake(.005, 1);
 					app.rocket.velocity.y = 0;
@@ -160,11 +161,13 @@ var app = app || {};
 			}
 			this.ctx.stroke();
 			this.ctx.restore();
-		
+			
+			this.drawUI();
+			
 			//draw rocket
 			app.rocket.draw(this.ctx);
 			
-			console.log("Delta time: "+ dt);
+			if(this.debug) console.log("Delta time: "+ dt);
 
 			break;
 			
@@ -175,10 +178,7 @@ var app = app || {};
 				this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
 				this.ctx.restore();
 				
-				//draw menu text
-				this.ctx.font=" 40px monospace";
-				this.ctx.textAlign = "center";
-				this.ctx.fillText("The rocket has landed!", this.WIDTH/2,this.HEIGHT/3 );
+				this.drawUI();
 			break;
 			
 			case this.GAME_STATE.DESTROYED:
@@ -188,10 +188,7 @@ var app = app || {};
 				this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
 				this.ctx.restore();
 				
-				//draw menu text
-				this.ctx.font=" 40px monospace";
-				this.ctx.textAlign = "center";
-				this.ctx.fillText("You were destroyed", this.WIDTH/2,this.HEIGHT/3 );
+				this.drawUI();
 			break;
 		}
 		
@@ -240,8 +237,44 @@ var app = app || {};
 		}
 		var closestPeakIndex = app.rocket.position - app.rocket.position.x % 5;
 		closestPeakIndex = Math.floor(closestPeakIndex);
-		//if()
 		
+		
+	},
+	
+	drawUI: function(){
+		
+		switch(this.state){
+			
+			case this.GAME_STATE.START:
+				//draw menu text
+				this.ctx.font=" 40px monospace";
+				this.ctx.textAlign = "center";
+				this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
+				this.ctx.fillText("Press E to start", this.WIDTH/2,this.HEIGHT/2 )
+				break;
+			
+			case this.GAME_STATE.DEFAULT:
+				if(this.debug){
+				this.ctx.font=" 20px monospace";
+				this.ctx.textAlign = "center";
+				this.ctx.fillText("Position: " + app.rocket.position, this.WIDTH/2,this.HEIGHT/3 );
+				this.ctx.fillText("Velocity: " + app.rocket.velocity, this.WIDTH/2,this.HEIGHT/2 );
+				this.ctx.fillText("Gimbal Position: " + app.rocket.currentGimbal, this.WIDTH/2,this.HEIGHT/1.5);
+				}
+			break;
+			case this.GAME_STATE.LANDED:
+				//draw menu text
+				this.ctx.font=" 40px monospace";
+				this.ctx.textAlign = "center";
+				this.ctx.fillText("The rocket has landed!", this.WIDTH/2,this.HEIGHT/3 );
+			break;
+			case this.GAME_STATE.DESTROYED:
+				//draw menu text
+				this.ctx.font=" 40px monospace";
+				this.ctx.textAlign = "center";
+				this.ctx.fillText("You were destroyed", this.WIDTH/2,this.HEIGHT/3 );
+			break;
+		}
 	}
  }
  

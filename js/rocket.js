@@ -35,7 +35,7 @@ var GRAVITY = new Victor(0,9.81);
 	 MAX_THROTTLE: 1.0,
 	 isThrottle: false,
 	 GIMBAL_RANGE: 15,
-	 GIMBAL_RESPONSE: 2,
+	 GIMBAL_RESPONSE: 7,
 	 currentGimbal: 0,
 	 
 	 //kinematic state
@@ -108,11 +108,15 @@ var GRAVITY = new Victor(0,9.81);
 			 //thrust debug line
 			 //inverted to be more "logical"
 			 if(this.isThrottle){
+			 ctx.save();
+			 ctx.rotate(this.currentGimbal * Math.PI / 180);
+			 
 			 ctx.beginPath();
 			 ctx.strokeStyle="orange";
 			 ctx.moveTo(0,0);
 			 ctx.lineTo(-this.thrustAccel.x*this.SCALE_FACTOR, -this.thrustAccel.y*this.SCALE_FACTOR);
 			 ctx.stroke();
+			 ctx.restore();
 				}
 			 
 
@@ -137,6 +141,7 @@ var GRAVITY = new Victor(0,9.81);
 		 ctx.fillStyle="red";
 		 ctx.translate(this.position.x, this.position.y);
 		 ctx.rotate(this.rotation * Math.PI/180);
+		 
 		 //rocket body
 		 ctx.fillRect(0,0, this.width, this.height);
 		 
@@ -149,7 +154,7 @@ var GRAVITY = new Victor(0,9.81);
 		 }
 		 
 		 
-		 console.log("Current Position: " +this.position);
+		 if(this.debug) console.log("Current Position: " +this.position);
 	 },
 	 
 	 update : function(dt){
@@ -162,7 +167,6 @@ var GRAVITY = new Victor(0,9.81);
 		 var angularAcceleration = torque / this.momentOfInertia;
 		 
 		 this.rotation += angularAcceleration * dt;
-		 console.log("rotation: " + this.rotation + " Angular Acceleration: " + angularAcceleration + " Torque: " + torque);
 		 }
 		
 		//linear motion
@@ -173,21 +177,24 @@ var GRAVITY = new Victor(0,9.81);
 		 this.acceleration.add(GRAVITY);
 		 
 		 //calculate thrust force
-		 //debugger;
 		 if(this.isThrottle){
 		 this.thrustAccel = this.thrust.clone().rotateDeg(this.rotation).multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
 		 //this.thrustAccel = this.thrust.clone().multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
 
 		 this.acceleration.add(this.thrustAccel);
-		 console.log("Acceleration due to thrust: " + this.thrustAccel);
 		 }
 		 
-		 console.log("Total Acceleration: " + this.acceleration);
 		 //update velocity
 		 this.velocity.add(this.acceleration.clone().multiplyScalar(dt));
 		 
 		 //update position
 		 this.position.add(this.velocity.clone().multiplyScalar(dt));
+		 
+		 if(this.debug){
+			 console.log("rotation: " + this.rotation + " Angular Acceleration: " + angularAcceleration + " Torque: " + torque);
+			 console.log("Acceleration due to thrust: " + this.thrustAccel);
+			 console.log("Total Acceleration: " + this.acceleration);
+		 }
 	 },
 	 
 	 borderCheck : function(){
@@ -217,23 +224,23 @@ var GRAVITY = new Victor(0,9.81);
 		 if(this.currentGimbal<targetValue) this.currentGimbal+= this.GIMBAL_RESPONSE * dt;
 		 if(this.currentGimbal>targetValue) this.currentGimbal-= this.GIMBAL_RESPONSE * dt;
 		 
-		 
+		 if(this.debug){
 		 console.log("current gimbal position: " +this.currentGimbal);
 		 console.log(dt);
-		 
+		 }
 	 },
 	 
 	 throttleOn : function(dt){
 		 if(this.isThrottle!=true) this.isThrottle=true;
 		 
-		 //debugger;
-		 console.log("Throttle On called");
+		 
+		 if(this.debug) console.log("Throttle On called");
 	 },
 	 
 	 throttleOff : function(dt){
 		 if(this.isThrottle!=false) this.isThrottle=false;
-		 //debugger;
-		 console.log("Throttle Off called");
+		 
+		 if(this.debug) console.log("Throttle Off called");
 	 }
 	 
  }
