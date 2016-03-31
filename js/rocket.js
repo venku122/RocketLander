@@ -219,6 +219,7 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 
 		 console.log("current gimbal position: " +this.currentGimbal);
+		 console.log(dt);
 		 
 	 },
 	 

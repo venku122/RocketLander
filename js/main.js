@@ -11,7 +11,7 @@
 var app = app || {};
 
 /*
- .main is an object literal that is a property of the app global
+ .main is an object literal that is a proaperty of the app global
  This object literal has its own properties and methods (functions)
  
  */
@@ -87,7 +87,7 @@ var app = app || {};
 			this.ctx.fillText("Press E to start", this.WIDTH/2,this.HEIGHT/2 )
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_E]) this.state = this.GAME_STATE.DEFAULT;
 			
-			render();
+			
 			
 			break;
 			
@@ -108,7 +108,19 @@ var app = app || {};
 			
 			
 			//update
+			
 			app.rocket.update(dt);
+			
+			if(app.rocket.position.y> 500 - app.rocket.height){
+				if(app.rocket.velocity.y>=25){
+					this.state = this.GAME_STATE.DESTROYED;
+				}
+				else{
+					this.state = this.GAME_STATE.LANDED;
+				}
+				
+				
+			}
 			
 			//debugger;
 			// 5) DRAW	
@@ -119,7 +131,6 @@ var app = app || {};
 			this.ctx.restore();
 			
 			//draw mountains
-			
 			this.ctx.beginPath();
 			this.ctx.moveTo(0, this.mountainPeaks[0]);
 			for (var x = 0; x < this.WIDTH; x++) {
@@ -130,20 +141,48 @@ var app = app || {};
 			}
 			this.ctx.stroke();
 			this.ctx.restore();
+			
+			//draw cheat landing plane
+			this.ctx.save();
+			this.ctx.strokeRect(0,500, this.WIDTH, 510);
+			this.ctx.restore();
 		
 			//draw rocket
 			app.rocket.draw(this.ctx);
 			
+			console.log("Delta time: "+ dt);
+
+			break;
 			
-			render();
-		
+			case this.GAME_STATE.LANDED:
+				// i) draw background
+				this.ctx.save();
+				this.ctx.fillStyle = this.grd; 
+				this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+				this.ctx.restore();
+				
+				//draw menu text
+				this.ctx.font=" 40px monospace";
+				this.ctx.textAlign = "center";
+				this.ctx.fillText("The rocket has landed!", this.WIDTH/2,this.HEIGHT/3 );
+			break;
 			
-			
+			case this.GAME_STATE.DESTROYED:
+				// i) draw background
+				this.ctx.save();
+				this.ctx.fillStyle = this.grd; 
+				this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+				this.ctx.restore();
+				
+				//draw menu text
+				this.ctx.font=" 40px monospace";
+				this.ctx.textAlign = "center";
+				this.ctx.fillText("You were destroyed", this.WIDTH/2,this.HEIGHT/3 );
 			break;
 		}
 		
 		
-		
+		render();
 	},
 	
 	generatePeaks: function(startY){
