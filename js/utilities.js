@@ -167,4 +167,11 @@ function perlin(x, y) {
 	return value - 1;
 }
 
+/*
+function crossVectors(vec1, vec2){
+	
+	var firstTerm = vec1.x * vec2.y;
+	var secondTerm = vec1.y * 
+}*/
+
 
