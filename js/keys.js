@@ -15,7 +15,8 @@ myKeys.KEYBOARD = Object.freeze({
 	"KEY_D": 68,
 	"KEY_A": 65,
 	"KEY_S": 83,
-	"KEY_W": 87
+	"KEY_W": 87,
+	"KEY_E": 69
 });
 
 // myKeys.keydown array to keep track of which keys are down

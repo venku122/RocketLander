@@ -217,7 +217,7 @@ var GRAVITY = new Victor(0,9.81);
 		 if(this.currentGimbal<targetValue) this.currentGimbal+= this.GIMBAL_RESPONSE * dt;
 		 if(this.currentGimbal>targetValue) this.currentGimbal-= this.GIMBAL_RESPONSE * dt;
 		 
-		 debugger;
+		 
 		 console.log("current gimbal position: " +this.currentGimbal);
 		 
 	 },
