@@ -19,7 +19,12 @@ var GRAVITY = new Victor(0,9.81);
 	 rotation: 0,
 	 massInitial: 409.5,
 	 massFinal: 22.2,
+	 currentMass: 22.2,
 	 centerOfMass: new Victor(0, this.height/3 * 2),
+	 //moment of inertia
+	 //I of Rod(Center) = (mass*Length^2)/12
+	 momentOfInertia: undefined,
+	 
 	 
 	 //engine state
 	 //thrust: .756
@@ -29,6 +34,7 @@ var GRAVITY = new Victor(0,9.81);
 	 MIN_THROTTLE: .55,
 	 MAX_THROTTLE: 1.0,
 	 GIMBAL_RANGE: 10,
+	 currentGimbal: 3,
 	 
 	 //kinematic state
 	 position: new Victor(0,0),
@@ -40,6 +46,9 @@ var GRAVITY = new Victor(0,9.81);
 	 debug: true,
 	 SCALE_FACTOR: 1.5,
 	 
+	 
+	 
+	 
 	 init : function(){
 		 //debugger;
 		 console.log("app.rocket.init() called");
@@ -47,6 +56,9 @@ var GRAVITY = new Victor(0,9.81);
 		 this.velocity = new Victor(0,0);
 		 this.centerOfMass = new Victor(0, this.height /3 *2);
 		 
+		//moment of inertia
+		//I of Rod(Center) = (mass*Length^2)/12
+		 this.momentOfInertia = (this.currentMass * this.centerOfMass.y * this.centerOfMass.y)/12;
 	 },
 	 
 	 //draws the rocket
@@ -57,7 +69,7 @@ var GRAVITY = new Victor(0,9.81);
 		 if(this.debug){
 			ctx.save();
 			ctx.translate(this.position.x, this.position.y);
-			
+			ctx.rotate(this.rotation * Math.PI/180);
 			//free body diagram
 			//block
 			ctx.fillRect(-5,-5,10,10);
@@ -92,6 +104,17 @@ var GRAVITY = new Victor(0,9.81);
 			 ctx.lineTo(GRAVITY.x*this.SCALE_FACTOR, GRAVITY.y*this.SCALE_FACTOR);
 			 ctx.stroke();
 			 
+			 //rotation vector debug line
+			 ctx.beginPath;
+			 ctx.strokeStyle = "pink";
+			 ctx.moveTo(0,0);
+			 var rotationVector = new Victor(1,1);
+			 rotationVector.rotateDeg(this.rotation);
+			 rotationVector.multiplyScalar(30);
+			 ctx.lineTo(rotationVector.x, rotationVector.y);
+			 ctx.stroke();
+			 console.log(rotationVector);
+			 
 			 ctx.restore();
 		 }
 		 else
@@ -117,6 +140,13 @@ var GRAVITY = new Victor(0,9.81);
 	 
 	 update : function(dt){
 		 
+		 //torque = centerOfMass* Thrust * gimbal angle
+		 var torque = this.centerOfMass.y * this.thrust.clone().y * this.currentGimbal;
+		 //acceleration = torque force / Moment of Inertia
+		 var angularAcceleration = torque / this.momentOfInertia;
+		 
+		 this.rotation += angularAcceleration * dt;
+		 console.log("rotation: " + this.rotation + " Angular Acceleration: " + angularAcceleration + " Torque: " + torque);
 		 //this.rotation+=0.5;
 		 //reset accelerations
 		 this.acceleration=new Victor(0,0);
