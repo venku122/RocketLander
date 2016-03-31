@@ -180,7 +180,7 @@ var GRAVITY = new Victor(0,9.81);
 		 if(this.isThrottle){
 		 this.thrustAccel = this.thrust.clone().rotateDeg(this.rotation).multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
 		 //this.thrustAccel = this.thrust.clone().multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
-
+		//multiplyScalar(Math.sin(this.currentGimbal * Math.PI /180))
 		 this.acceleration.add(this.thrustAccel);
 		 }
 		 

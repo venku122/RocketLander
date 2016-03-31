@@ -88,17 +88,10 @@ var app = app || {};
 			
 			case this.GAME_STATE.START:
 			
-			// i) draw background
-			this.ctx.save();
-			this.ctx.fillStyle = this.grd; 
-			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
-			this.ctx.restore();
+			this.drawBG();
 			this.drawUI();
-
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_E]) this.state = this.GAME_STATE.DEFAULT;
-			
-			
-			
+
 			break;
 			
 			case this.GAME_STATE.DEFAULT:
@@ -118,7 +111,6 @@ var app = app || {};
 			
 			
 			//update
-			
 			app.rocket.update(dt);
 			
 			if(app.rocket.position.y > this.clearHeight - app.rocket.height){
@@ -138,31 +130,15 @@ var app = app || {};
 				else{
 					this.state = this.GAME_STATE.LANDED;
 				}
-				
-				
 			}
 			
 			//debugger;
 			// 5) DRAW	
-			// i) draw background
-			this.ctx.save();
-			this.ctx.fillStyle = this.grd; 
-			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
-			this.ctx.restore();
+				this.drawBG();
+				this.drawUI();
 			
 			//draw mountains
-			this.ctx.beginPath();
-			this.ctx.moveTo(0, this.mountainPeaks[0]);
-			for (var x = 0; x < this.WIDTH; x++) {
-				var noise = perlin(x, 50);
-				
-				//this.ctx.lineTo(map_range(x, 0, perlinSize, 0, this.WIDTH), y += (noise * 2 * (Math.random() > .5 ? 1 : -1)));
-				this.ctx.lineTo(x, this.mountainPeaks[x]);
-			}
-			this.ctx.stroke();
-			this.ctx.restore();
-			
-			this.drawUI();
+			this.drawTerrain();
 			
 			//draw rocket
 			app.rocket.draw(this.ctx);
@@ -172,22 +148,12 @@ var app = app || {};
 			break;
 			
 			case this.GAME_STATE.LANDED:
-				// i) draw background
-				this.ctx.save();
-				this.ctx.fillStyle = this.grd; 
-				this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
-				this.ctx.restore();
-				
+				this.drawBG();
 				this.drawUI();
 			break;
 			
 			case this.GAME_STATE.DESTROYED:
-				// i) draw background
-				this.ctx.save();
-				this.ctx.fillStyle = this.grd; 
-				this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
-				this.ctx.restore();
-				
+				this.drawBG();
 				this.drawUI();
 			break;
 		}
@@ -259,6 +225,7 @@ var app = app || {};
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("Position: " + app.rocket.position, this.WIDTH/2,this.HEIGHT/3 );
 				this.ctx.fillText("Velocity: " + app.rocket.velocity, this.WIDTH/2,this.HEIGHT/2 );
+				this.ctx.fillText("Acceleration " + app.rocket.acceleration, this.WIDTH/2,this.HEIGHT/1.5 - 50);
 				this.ctx.fillText("Gimbal Position: " + app.rocket.currentGimbal, this.WIDTH/2,this.HEIGHT/1.5);
 				}
 			break;
@@ -275,6 +242,27 @@ var app = app || {};
 				this.ctx.fillText("You were destroyed", this.WIDTH/2,this.HEIGHT/3 );
 			break;
 		}
+	},
+	
+	drawBG: function(){
+		// i) draw background
+			this.ctx.save();
+			this.ctx.fillStyle = this.grd; 
+			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+			this.ctx.restore();
+	},
+	
+	drawTerrain: function(){
+				this.ctx.beginPath();
+				this.ctx.moveTo(0, this.mountainPeaks[0]);
+				for (var x = 0; x < this.WIDTH; x++) {
+					var noise = perlin(x, 50);
+					
+					//this.ctx.lineTo(map_range(x, 0, perlinSize, 0, this.WIDTH), y += (noise * 2 * (Math.random() > .5 ? 1 : -1)));
+					this.ctx.lineTo(x, this.mountainPeaks[x]);
+				}
+				this.ctx.stroke();
+				this.ctx.restore();
 	}
  }
  
