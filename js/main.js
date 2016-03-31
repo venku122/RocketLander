@@ -48,7 +48,7 @@ var app = app || {};
 		//this.canvas.height = this.HEIGHT;
 		this.ctx = this.canvas.getContext('2d');
 		
-		this.state = this.GAME_STATE.DEFAULT;
+		this.state = this.GAME_STATE.START;
 		
 		this.generatePeaks(this.HEIGHT / 3 * 2);
 		
@@ -71,14 +71,46 @@ var app = app || {};
 		
 		switch(this.state){
 			
+			
+			case this.GAME_STATE.START:
+			
+			// i) draw background
+			this.ctx.save();
+			this.ctx.fillStyle = this.grd; 
+			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+			this.ctx.restore();
+			
+			//draw menu text
+			this.ctx.font=" 40px monospace";
+			this.ctx.textAlign = "center";
+			this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
+			this.ctx.fillText("Press E to start", this.WIDTH/2,this.HEIGHT/2 )
+			if(myKeys.keydown[myKeys.KEYBOARD.KEY_E]) this.state = this.GAME_STATE.DEFAULT;
+			
+			render();
+			
+			break;
+			
 			case this.GAME_STATE.DEFAULT:
 			
 			//get deltaTime
 			var dt = this.calculateDeltaTime();
 			
+			//collect input
+			//change gimbal position
+			if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
+			if(myKeys.keydown[myKeys.KEYBOARD.KEY_D]) app.rocket.changeGimbal(15, dt);
+			if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
+			
+			//check for throttle
+			if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
+			if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
+			
+			
 			//update
 			app.rocket.update(dt);
 			
+			//debugger;
 			// 5) DRAW	
 			// i) draw background
 			this.ctx.save();
@@ -86,42 +118,32 @@ var app = app || {};
 			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
 			this.ctx.restore();
 			
+			//draw mountains
+			
+			this.ctx.beginPath();
+			this.ctx.moveTo(0, this.mountainPeaks[0]);
+			for (var x = 0; x < this.WIDTH; x++) {
+				var noise = perlin(x, 50);
+				
+				//this.ctx.lineTo(map_range(x, 0, perlinSize, 0, this.WIDTH), y += (noise * 2 * (Math.random() > .5 ? 1 : -1)));
+				this.ctx.lineTo(x, this.mountainPeaks[x]);
+			}
+			this.ctx.stroke();
+			this.ctx.restore();
+		
 			//draw rocket
 			app.rocket.draw(this.ctx);
 			
+			
+			render();
+		
+			
+			
 			break;
 		}
-		//get deltaTime
-		var dt = this.calculateDeltaTime();
 		
-		//update
-		app.rocket.update(dt);
 		
-		// 5) DRAW	
-		// i) draw background
-		this.ctx.save();
-		this.ctx.fillStyle = this.grd; 
-		this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
-		this.ctx.restore();
 		
-		//this.ctx.save();
-		
-		this.ctx.beginPath();
-		
-		this.ctx.moveTo(0, this.mountainPeaks[0]);
-		for (var x = 0; x < this.WIDTH; x++) {
-			var noise = perlin(x, 50);
-			
-			//this.ctx.lineTo(map_range(x, 0, perlinSize, 0, this.WIDTH), y += (noise * 2 * (Math.random() > .5 ? 1 : -1)));
-			this.ctx.lineTo(x, this.mountainPeaks[x]);
-		}
-		this.ctx.stroke();
-		this.ctx.restore();
-		
-		//draw rocket
-		app.rocket.draw(this.ctx);
-		
-		render();
 	},
 	
 	generatePeaks: function(startY){
