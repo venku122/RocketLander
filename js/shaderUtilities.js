@@ -13,6 +13,39 @@ var triangles = new Float32Array([
 		1, -1,
 		1, 1
 	])
+	
+var edgeDetectKernel = [
+		-1,	-1,	-1,
+		-1,	8,	-1,
+		-1,	-1,	-1
+	]
+	
+var embossKernel = [
+	2, 0, 0,
+	0, -1,0,
+	0, 0, -1
+]
+
+var blurKernel = [
+	-1, 2, 1,
+	2, 4, 2,
+	1, 2, 1
+]
+
+var sharpnessKernel = [
+	-1,	-1, -1,
+	-1,	9,	-1,
+	-1,	-1,	-1
+]
+
+var defaultKernel = [
+	0, 0, 0,
+	0, 1,0,
+	0, 0, 0
+]
+
+
+var program;
 
 function initWebGL(canvasID, glCanvasID) {
 	canvas = document.getElementById( glCanvasID );
@@ -53,7 +86,7 @@ function initWebGL(canvasID, glCanvasID) {
 	gl.compileShader( fragmentShader);
 	
 	//create a shader program
-	var program = gl.createProgram();
+	program = gl.createProgram();
 	gl.attachShader( program, vertexShader );
 	gl.attachShader( program, fragmentShader );
 	gl.linkProgram( program );
@@ -72,8 +105,8 @@ function initWebGL(canvasID, glCanvasID) {
 		program.textureCoordAttribute, 2, gl.FLOAT, false, 0, 0
 	);
 	
-	program.chaos = gl.getUniformLocation(program, 'chaos');
-	gl.uniform1i(program.chaos, false);
+	program.textureSizeLocation = gl.getUniformLocation(program, "textureSize");
+	gl.uniform2f(program.textureSizeLocation, canvas.width, canvas.height);
 	
 	var d = new Date();
 	var n = d.getMilliseconds();
@@ -83,6 +116,8 @@ function initWebGL(canvasID, glCanvasID) {
 	// the sampler will automatically pass in the bound texture
 	program.samplerUniform = gl.getUniformLocation( program, 'uSampler' );
 	gl.uniform1i( program.samplerUniform, 0 );
+	
+	assignKernel(defaultKernel);
 	
 	texture = gl.createTexture();
 }
@@ -114,10 +149,53 @@ function render() {
 		
 		webGLSetup();
 		
+		var d = new Date();
+		var n = d.getMilliseconds();
+		program.time = gl.getUniformLocation(program, 'time');
+		gl.uniform1f(program.time, n);
+		
 		getTexture();
 		
 		gl.drawArrays( gl.TRIANGLES, 0, 6 );
 
 }
 
+
+function computeKernelWeight(kernel) {
+   var weight = kernel.reduce(function(prev, curr) {
+       return prev + curr;
+   });
+   return weight <= 0 ? 1 : weight;
+}
+ 
+function assignKernel(kernel) {
+	program.kernelLocation = gl.getUniformLocation(program, 'kernel[0]');
+	program.kernelWeightLocation = gl.getUniformLocation(program, 'kernelWeight');
+	
+	gl.uniform1fv(program.kernelLocation, kernel);
+	gl.uniform1f(program.kernelWeightLocation, computeKernelWeight(kernel));
+}
+
+function shake(strength, duration) {
+	assignKernel(blurKernel);
+	
+	program.shake = gl.getUniformLocation(program, 'shake');
+	gl.uniform1i(program.shake, 1);
+	
+	program.strength = gl.getUniformLocation(program, 'strength');
+	gl.uniform1f(program.strength, strength);
+	
+	var countDown = function() {
+		duration -= .1;
+		if(duration > 0) {
+			requestAnimationFrame(countDown);
+		} else {
+			program.shake = gl.getUniformLocation(program, 'shake');
+			gl.uniform1i(program.shake, 0);
+			assignKernel(defaultKernel);
+		}
+	}
+	
+	countDown();
+}
 

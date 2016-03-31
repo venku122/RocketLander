@@ -26,6 +26,11 @@ var app = app || {};
 		DESTROYED: 3,
 		OPTIONS: 4
 	}),
+	GAME_MODE: {
+		MOUNTAIN: 0,
+		SEA: 1,
+		DESSERT: 2
+	},
 	
 	 //Properties
 	canvas: undefined,
@@ -37,6 +42,10 @@ var app = app || {};
 	grd: undefined,
 	mountainPeaks: [],
 	state: null,
+	mode: null,
+	mountainIndex: 5,
+	landDifferential: 2,
+	clearHeight: 0,
 	
 	init : function(){
 		console.log("app.main.init() called");
@@ -49,6 +58,7 @@ var app = app || {};
 		this.ctx = this.canvas.getContext('2d');
 		
 		this.state = this.GAME_STATE.START;
+		this.mode = this.GAME_MODE.MOUNTAIN;
 		
 		this.generatePeaks(this.HEIGHT / 3 * 2);
 		
@@ -70,7 +80,6 @@ var app = app || {};
 		
 		
 		switch(this.state){
-			
 			
 			case this.GAME_STATE.START:
 			
@@ -111,9 +120,19 @@ var app = app || {};
 			
 			app.rocket.update(dt);
 			
-			if(app.rocket.position.y> 500 - app.rocket.height){
-				if(app.rocket.velocity.y>=25){
-					this.state = this.GAME_STATE.DESTROYED;
+			if(app.rocket.position.y > this.clearHeight){
+				if( !this.didLandSafely(app.rocket) || this.timer != null){
+					shake(.005, 1);
+					app.rocket.velocity.y = 0;
+					app.rocket.velocity.x = 0;
+					if(this.timer == null) {
+						this.timer = 2;
+					} else {
+						this.timer -= dt;
+					}
+					if(this.timer < 0) {
+						this.state = this.GAME_STATE.DESTROYED;
+					}
 				}
 				else{
 					this.state = this.GAME_STATE.LANDED;
@@ -140,11 +159,6 @@ var app = app || {};
 				this.ctx.lineTo(x, this.mountainPeaks[x]);
 			}
 			this.ctx.stroke();
-			this.ctx.restore();
-			
-			//draw cheat landing plane
-			this.ctx.save();
-			this.ctx.strokeRect(0,500, this.WIDTH, 510);
 			this.ctx.restore();
 		
 			//draw rocket
@@ -188,10 +202,23 @@ var app = app || {};
 	generatePeaks: function(startY){
 		this.mountainPeaks = new Array(this.width);
 		var y = startY;
-		for (var x = 0; x < this.WIDTH; x += 5) {
+		for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
 			var noise = perlin(x, 50);
 			this.mountainPeaks[x] = y;
 			y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
+		}
+		
+		if(this.mode == this.GAME_MODE.MOUNTAIN) {
+			var min = 15;
+			var range = 20;
+			var rand = map_range(Math.random(), 0, 1, min, min + range);
+			rand = Math.round(rand);
+			var startIndex = map_range(Math.random(), 0, 1, 0, this.WIDTH / this.mountainIndex);
+			startIndex = Math.floor(startIndex);
+			this.clearHeight = this.HEIGHT - 200;
+			for(x = startIndex * this.mountainIndex; x < startIndex * this.mountainIndex + (rand * this.mountainIndex); x += this.mountainIndex) {
+				this.mountainPeaks[x] = this.clearHeight;
+			}
 		}
 	},
 	
@@ -205,6 +232,16 @@ var app = app || {};
 		fps = clamp(fps, 12, 60);
 		this.lastTime = now; 
 		return 1/fps;
+	},
+	
+	didLandSafely: function(rocket) {
+		if(app.rocket.velocity.y>=25){
+			return false;
+		}
+		var closestPeakIndex = app.rocket.position - app.rocket.position.x % 5;
+		closestPeakIndex = Math.floor(closestPeakIndex);
+		//if()
+		
 	}
  }
  

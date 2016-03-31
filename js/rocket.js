@@ -225,6 +225,7 @@ var GRAVITY = new Victor(0,9.81);
 	 
 	 throttleOn : function(dt){
 		 if(this.isThrottle!=true) this.isThrottle=true;
+		 
 		 //debugger;
 		 console.log("Throttle On called");
 	 },
