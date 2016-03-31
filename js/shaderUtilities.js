@@ -52,7 +52,7 @@ function initWebGL(canvasID, glCanvasID) {
 	gl.shaderSource( fragmentShader, fragmentSource );
 	gl.compileShader( fragmentShader);
 	
-	//creaqte a shader program
+	//create a shader program
 	var program = gl.createProgram();
 	gl.attachShader( program, vertexShader );
 	gl.attachShader( program, fragmentShader );
@@ -72,6 +72,14 @@ function initWebGL(canvasID, glCanvasID) {
 		program.textureCoordAttribute, 2, gl.FLOAT, false, 0, 0
 	);
 	
+	program.chaos = gl.getUniformLocation(program, 'chaos');
+	gl.uniform1i(program.chaos, false);
+	
+	var d = new Date();
+	var n = d.getMilliseconds();
+	program.time = gl.getUniformLocation(program, 'time');
+	gl.uniform1f(program.time, n);
+	
 	// the sampler will automatically pass in the bound texture
 	program.samplerUniform = gl.getUniformLocation( program, 'uSampler' );
 	gl.uniform1i( program.samplerUniform, 0 );
@@ -89,6 +97,8 @@ function getTexture() {
 	
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR );
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 }
 
 function webGLSetup() {
