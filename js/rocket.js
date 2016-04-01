@@ -48,6 +48,12 @@ var GRAVITY = new Victor(0,9.81);
 	 debug: false,
 	 SCALE_FACTOR: 1.5,
 	 
+	 //graphics
+	 ROCKET_SPRITE: {
+		DEPLOYED: new Image(),
+		STOWED: new Image(),
+	},
+	 
 	 
 	 
 	 
@@ -62,6 +68,10 @@ var GRAVITY = new Victor(0,9.81);
 		//I of Rod(Center) = (mass*Length^2)/12
 		
 		 this.momentOfInertia = (this.currentMass * this.centerOfMass * this.centerOfMass)/12;
+		 
+		 //load images
+		 this.ROCKET_SPRITE.DEPLOYED.src = "media/images/f9FirstStageLegsFins298x1254.png";
+		 this.ROCKET_SPRITE.STOWED.src = "media/images/f9FirstStageNoDeploy100x1198.png";
 	 },
 	 
 	 //draws the rocket
@@ -143,7 +153,8 @@ var GRAVITY = new Victor(0,9.81);
 		 ctx.rotate(this.rotation * Math.PI/180);
 		 
 		 //rocket body
-		 ctx.fillRect(0,0, this.width, this.height);
+		 //ctx.fillRect(0,0, this.width, this.height);
+		 ctx.drawImage(this.ROCKET_SPRITE.DEPLOYED,0,0, this.width, this.height);
 		 
 		 //rocket legs
 		 ctx.fillStyle="black";
@@ -241,6 +252,7 @@ var GRAVITY = new Victor(0,9.81);
 		 if(this.isThrottle!=false) this.isThrottle=false;
 		 
 		 if(this.debug) console.log("Throttle Off called");
-	 }
+	 },
+	 
 	 
  }
