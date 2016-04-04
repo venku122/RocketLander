@@ -53,6 +53,8 @@ var GRAVITY = new Victor(0,9.81);
 		DEPLOYED: new Image(),
 		STOWED: new Image(),
 	},
+	
+	aiFunctions: [],
 	 
 	 
 	 
@@ -72,6 +74,8 @@ var GRAVITY = new Victor(0,9.81);
 		 //load images
 		 this.ROCKET_SPRITE.DEPLOYED.src = "media/images/f9FirstStageLegsFins298x1254.png";
 		 this.ROCKET_SPRITE.STOWED.src = "media/images/f9FirstStageNoDeploy100x1198.png";
+		 
+		 this.aiFunctions = new Array();
 	 },
 	 
 	 //draws the rocket
@@ -201,6 +205,8 @@ var GRAVITY = new Victor(0,9.81);
 		 //update position
 		 this.position.add(this.velocity.clone().multiplyScalar(dt));
 		 
+		 this.runAI();
+		 
 		 if(this.debug){
 			 console.log("rotation: " + this.rotation + " Angular Acceleration: " + angularAcceleration + " Torque: " + torque);
 			 console.log("Acceleration due to thrust: " + this.thrustAccel);
@@ -253,6 +259,12 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 if(this.debug) console.log("Throttle Off called");
 	 },
+	 
+	 runAI: function() {
+		 for(var i = 0; i < this.aiFunctions.length; i++) {
+			this.aiFunctions[i]();
+		 }
+	 }
 	 
 	 
  }

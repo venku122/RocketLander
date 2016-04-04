@@ -47,6 +47,7 @@ var app = app || {};
 	mountainIndex: 5,
 	landDifferential: 2,
 	clearHeight: 0,
+	target: {},
 	
 	init : function(){
 		if(this.debug) console.log("app.main.init() called");
@@ -68,6 +69,21 @@ var app = app || {};
 		this.grd.addColorStop(1, "skyblue"),
 		this.grd.addColorStop(0, "white"),
 		//this.grd = "skyblue";
+		
+		app.rocket.aiFunctions.push(function(){
+			if(app.rocket.position.y < app.main.target.y && app.rocket.velocity.y > 10) {
+				app.rocket.throttleOn(app.main.calculateDeltaTime());
+			} else {
+				app.rocket.throttleOff(app.main.calculateDeltaTime());
+			}
+		});
+		app.rocket.aiFunctions.push(function(){
+			if(app.rocket.position.x < app.main.target.x && app.rocket.rotation < Math.PI / 4) {
+				app.rocket.changeGimbal(-.5, app.main.calculateDeltaTime());
+			} else if(app.rocket.position.x > app.main.target.x && app.rocket.rotation < Math.PI / 4){
+				app.rocket.changeGimbal(.5, app.main.calculateDeltaTime());
+			}
+		});
 		
 		this.update();
 	},
@@ -104,11 +120,12 @@ var app = app || {};
 			//change gimbal position
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_D]) app.rocket.changeGimbal(15, dt);
-			if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
+			//if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
 			
 			//check for throttle
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
-			if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
+			//if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
+			// TODO: Make a different control scheme or toggle for this as it breaks AI controls
 			
 			
 			//update
@@ -182,6 +199,8 @@ var app = app || {};
 			for(x = startIndex * this.mountainIndex; x < startIndex * this.mountainIndex + (rand * this.mountainIndex); x += this.mountainIndex) {
 				this.mountainPeaks[x] = this.clearHeight;
 			}
+			this.target.x = startIndex * this.mountainIndex + (rand * this.mountainIndex / 2);
+			this.target.y = this.clearHeight;
 		}
 	},
 	
@@ -210,10 +229,9 @@ var app = app || {};
 	checkForCollisions: function(rocket) {
 		for(var i = 0; i < 3; i ++) {
 			var index = Math.floor(rocket.position.x) - (Math.floor(rocket.position.x + 5 * i) % 5)
-			if(Math.abs(rocket.position.y + rocket.height - this.mountainPeaks[index]) < this.landDifferential) {
+			if(Math.abs(rocket.position.y + rocket.height - this.mountainPeaks[index]) < this.landDifferential ||rocket.position.y + rocket.height > this.mountainPeaks[index]) {
 				return true;
 			}
-			console.log("Target: "+ Math.abs(rocket.position.y + rocket.height - this.mountainPeaks[index]) + ", Differential: " + this.landDifferential)
 		}
 		return false;
 		

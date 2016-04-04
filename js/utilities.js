@@ -14,7 +14,6 @@ function getRandom(min, max) {
   	return Math.random() * (max - min) + min;
 }
 
-
 function makeColor(red, green, blue, alpha){
 	var color='rgba('+red+','+green+','+blue+', '+alpha+')';
 	return color;
