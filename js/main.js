@@ -47,6 +47,7 @@ var app = app || {};
 	mountainIndex: 5,
 	landDifferential: 2,
 	clearHeight: 0,
+	time: 0,
 	target: {},
 	
 	init : function(){
@@ -115,7 +116,7 @@ var app = app || {};
 			
 			//get deltaTime
 			var dt = this.calculateDeltaTime();
-			
+			this.time += dt;
 			//collect input
 			//change gimbal position
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
@@ -156,6 +157,18 @@ var app = app || {};
 			
 			//draw mountains
 			this.drawTerrain();
+			
+			this.ctx.save();
+			this.ctx.beginPath();
+			this.ctx.moveTo(this.target.x - 20 - 10 * Math.sin(this.time), this.target.y);
+			this.ctx.lineTo(this.target.x, this.target.y);
+			this.ctx.lineTo(this.target.x, this.target.y - 20 - 10 * Math.sin(this.time));
+			this.ctx.lineTo(this.target.x, this.target.y);
+			this.ctx.lineTo(this.target.x + 20 + 10 * Math.sin(this.time), this.target.y);
+			this.ctx.closePath();
+			this.ctx.strokeStyle = "yellow";
+			this.ctx.stroke();
+			this.ctx.restore();
 			
 			//draw rocket
 			app.rocket.draw(this.ctx);
@@ -276,32 +289,35 @@ var app = app || {};
 	
 	drawBG: function(){
 		// i) draw background
-			this.ctx.save();
-			this.ctx.fillStyle = this.grd; 
-			this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
-			this.ctx.restore();
+		this.ctx.save();
+		this.ctx.fillStyle = this.grd; 
+		this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+		this.ctx.restore();
 	},
 	
 	drawTerrain: function(){
-				this.ctx.beginPath();
-				if(this.mode == this.GAME_MODE.MOUNTAIN) {
-					this.ctx.moveTo(0, this.HEIGHT);
-					this.ctx.lineTo(0, this.mountainPeaks[0]);
-				} else {
-					this.ctx.moveTo(0, this.mountainPeaks[0]);
-				}
-				for (var x = 0; x < this.WIDTH; x++) {
-					var noise = perlin(x, 50);
-					this.ctx.lineTo(x, this.mountainPeaks[x]);
-				}
-				if(this.mode == this.GAME_MODE.MOUNTAIN) {
-					this.ctx.lineTo(this.WIDTH, this.HEIGHT);
-					this.ctx.fillStyle = "brown";
-					this.ctx.fill();
-				}
-				this.ctx.stroke();
-				
-				this.ctx.restore();
+		this.ctx.save();
+		this.ctx.beginPath();
+		if(this.mode == this.GAME_MODE.MOUNTAIN) {
+			this.ctx.moveTo(0, this.HEIGHT);
+			this.ctx.lineTo(0, this.mountainPeaks[0]);
+		} else {
+			this.ctx.moveTo(0, this.mountainPeaks[0]);
+		}
+		for (var x = 0; x < this.WIDTH; x++) {
+			var noise = perlin(x, 50);
+			this.ctx.lineTo(x, this.mountainPeaks[x]);
+		}
+		if(this.mode == this.GAME_MODE.MOUNTAIN) {
+			this.ctx.lineTo(this.WIDTH, this.HEIGHT);
+			this.ctx.fillStyle = "brown";
+			this.ctx.fill();
+		}
+		this.ctx.closePath();
+		this.ctx.strokeStyle = "black";
+		this.ctx.stroke();
+		
+		this.ctx.restore();
 	}
  }
  

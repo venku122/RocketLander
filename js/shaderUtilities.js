@@ -38,6 +38,12 @@ var sharpnessKernel = [
 	-1,	-1,	-1
 ]
 
+var bottomSobelKernel = [
+	-1, -2, -1,
+	0, 0, 0,
+	1, 2, 1
+]
+
 var defaultKernel = [
 	0, 0, 0,
 	0, 1,0,
