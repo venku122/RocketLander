@@ -195,10 +195,19 @@ var app = app || {};
 	generatePeaks: function(startY){
 		this.mountainPeaks = new Array(this.width);
 		var y = startY;
-		for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
-			var noise = perlin(x, 50);
-			this.mountainPeaks[x] = y;
-			y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
+		
+		if(this.mode == this.GAME_MODE.SEA) {
+			for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
+				var noise = perlin(x, 50);
+				this.mountainPeaks[x] = y;
+				//y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
+			}	
+		} else {
+			for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
+				var noise = perlin(x, 50);
+				this.mountainPeaks[x] = y;
+				y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
+			}
 		}
 		
 		if(this.mode == this.GAME_MODE.MOUNTAIN) {
@@ -206,9 +215,9 @@ var app = app || {};
 			var range = 20;
 			var rand = map_range(Math.random(), 0, 1, min, min + range);
 			rand = Math.round(rand);
-			var startIndex = map_range(Math.random(), 0, 1, 0, this.WIDTH / this.mountainIndex);
+			var startIndex = map_range(Math.random(), 0, 1, 0, (this.WIDTH / (this.mountainIndex )) - min - range);
 			startIndex = Math.floor(startIndex);
-			this.clearHeight = this.HEIGHT - 200;
+			this.clearHeight = this.mountainPeaks[startIndex - startIndex % 5];
 			for(x = startIndex * this.mountainIndex; x < startIndex * this.mountainIndex + (rand * this.mountainIndex); x += this.mountainIndex) {
 				this.mountainPeaks[x] = this.clearHeight;
 			}
@@ -301,16 +310,27 @@ var app = app || {};
 		if(this.mode == this.GAME_MODE.MOUNTAIN) {
 			this.ctx.moveTo(0, this.HEIGHT);
 			this.ctx.lineTo(0, this.mountainPeaks[0]);
+		} else if (this.mode == this.GAME_MODE.SEA) {
+			this.ctx.moveTo(0, this.HEIGHT);
+			this.ctx.lineTo(0, this.mountainPeaks[0] + 2 * Math.sin(this.time));
 		} else {
 			this.ctx.moveTo(0, this.mountainPeaks[0]);
 		}
-		for (var x = 0; x < this.WIDTH; x++) {
+		for (var x = 0; x < this.WIDTH; x+= this.mountainIndex) {
 			var noise = perlin(x, 50);
-			this.ctx.lineTo(x, this.mountainPeaks[x]);
+			if(this.mode == this.GAME_MODE.SEA) {
+				this.ctx.quadraticCurveTo(x + (10) * Math.cos(this.time), this.mountainPeaks[x] + ( 10) * Math.sin(this.time),x + (20) * Math.cos(this.time), this.mountainPeaks[x + this.mountainIndex] );
+			} else {
+				this.ctx.lineTo(x, this.mountainPeaks[x]);
+			}
 		}
 		if(this.mode == this.GAME_MODE.MOUNTAIN) {
 			this.ctx.lineTo(this.WIDTH, this.HEIGHT);
 			this.ctx.fillStyle = "brown";
+			this.ctx.fill();
+		} else if (this.mode == this.GAME_MODE.SEA) {
+			this.ctx.lineTo(this.WIDTH, this.HEIGHT);
+			this.ctx.fillStyle = "lightblue";
 			this.ctx.fill();
 		}
 		this.ctx.closePath();
