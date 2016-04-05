@@ -72,6 +72,8 @@ var GRAVITY = new Victor(0,9.81);
 		 this.momentOfInertia = (this.currentMass * this.centerOfMass * this.centerOfMass)/12;
 		 
 		 //load images
+		 this.ROCKET_SPRITE.STOWED.crossOrigin = "anonymous";
+		 this.ROCKET_SPRITE.DEPLOYED.crossOrigin = "anonymous";
 		 this.ROCKET_SPRITE.DEPLOYED.src = "media/images/f9FirstStageLegsFins298x1254.png";
 		 this.ROCKET_SPRITE.STOWED.src = "media/images/f9FirstStageNoDeploy100x1198.png";
 		 
@@ -157,8 +159,8 @@ var GRAVITY = new Victor(0,9.81);
 		 ctx.rotate(this.rotation * Math.PI/180);
 		 
 		 //rocket body
-		 //ctx.fillRect(0,0, this.width, this.height);
-		 ctx.drawImage(this.ROCKET_SPRITE.DEPLOYED,0,0, this.width, this.height);
+		 ctx.fillRect(0,0, this.width, this.height);
+		 //ctx.drawImage(this.ROCKET_SPRITE.DEPLOYED,0,0, this.width, this.height);
 		 
 		 //rocket legs
 		 ctx.fillStyle="black";
