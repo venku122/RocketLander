@@ -99,7 +99,7 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 if(this.debug){
 			 ctx.save();
-			 ctx.translate(this.position.x, this.position.y);
+			 ctx.translate(this.position.x + this.width/2, this.position.y);
 			 
 			 //acceleration debug line
 			 ctx.beginPath();
@@ -127,16 +127,16 @@ var GRAVITY = new Victor(0,9.81);
 			ctx.rotate(this.rotation * Math.PI/180);
 			//free body diagram
 			//block
-			ctx.fillRect(-5,-5,10,10);
+			ctx.fillRect(-5,this.centerOfMass-5,10,10);
 			
-			//CoM
-			ctx.fillRect(-2, 0,2, this.centerOfMass);
+			//Rocket Cylinder
+			ctx.fillRect(-2,0,2,this.height );
 			
 			 //thrust debug line
 			 //inverted to be more "logical"
 			 if(this.isThrottle){
 			 ctx.save();
-			 ctx.translate(0, this.centerOfMass);
+			 ctx.translate(0, this.height);
 			 ctx.rotate(this.currentGimbal * Math.PI / 180);
 			 ctx.beginPath();
 			 ctx.strokeStyle="orange";
@@ -268,6 +268,7 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 if(this.currentGimbal<targetValue) this.currentGimbal+= this.GIMBAL_RESPONSE * dt;
 		 if(this.currentGimbal>targetValue) this.currentGimbal-= this.GIMBAL_RESPONSE * dt;
+		 
 		 
 		 if(this.debug){
 		 console.log("current gimbal position: " +this.currentGimbal);

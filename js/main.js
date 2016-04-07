@@ -121,7 +121,7 @@ var app = app || {};
 			//change gimbal position
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
 			if(!app.rocket.autopilot) if(myKeys.keydown[myKeys.KEYBOARD.KEY_D]) app.rocket.changeGimbal(15, dt);
-			//if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
+			if(!app.rocket.autopilot) if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
 			
 			//check for throttle
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
@@ -272,6 +272,15 @@ var app = app || {};
 				break;
 			
 			case this.GAME_STATE.DEFAULT:
+				this.ctx.font=" 20px monospace";
+				this.ctx.textAlign = "center";
+				if(app.rocket.velocity.y < 25 && app.rocket.velocity.y > 0){
+				this.ctx.fillText("Safe to land", app.rocket.position.x + 100, app.rocket.position.y);
+				}
+				else{
+				this.ctx.fillColor= "red";
+				this.ctx.fillText("Not Safe to land", app.rocket.position.x + 100, app.rocket.position.y);
+				}
 				if(this.debug){
 				this.ctx.font=" 20px monospace";
 				this.ctx.textAlign = "center";
