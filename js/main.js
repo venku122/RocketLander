@@ -61,9 +61,6 @@ var app = app || {};
 		this.ctx = this.canvas.getContext('2d');
 		
 		this.state = this.GAME_STATE.START;
-		this.mode = this.GAME_MODE.MOUNTAIN;
-		
-		this.generatePeaks(this.HEIGHT / 3 * 2);
 		
 		//set gradient
 		this.grd = this.ctx.createLinearGradient(135,206,250, this.HEIGHT),
@@ -108,7 +105,16 @@ var app = app || {};
 			
 			this.drawBG();
 			this.drawUI();
-			if(myKeys.keydown[myKeys.KEYBOARD.KEY_E]) this.state = this.GAME_STATE.DEFAULT;
+			if(myKeys.keydown[myKeys.KEYBOARD.KEY_M]) {
+				this.mode = this.GAME_MODE.MOUNTAIN;
+				this.generatePeaks(this.HEIGHT / 3 * 2);
+				this.state = this.GAME_STATE.DEFAULT;
+			}
+			if(myKeys.keydown[myKeys.KEYBOARD.KEY_S]) {
+				this.mode = this.GAME_MODE.SEA;
+				this.generatePeaks(this.HEIGHT / 3 * 2);
+				this.state = this.GAME_STATE.DEFAULT;
+			}
 
 			break;
 			
@@ -158,17 +164,8 @@ var app = app || {};
 			//draw mountains
 			this.drawTerrain();
 			
-			this.ctx.save();
-			this.ctx.beginPath();
-			this.ctx.moveTo(this.target.x - 20 - 10 * Math.sin(this.time), this.target.y);
-			this.ctx.lineTo(this.target.x, this.target.y);
-			this.ctx.lineTo(this.target.x, this.target.y - 20 - 10 * Math.sin(this.time));
-			this.ctx.lineTo(this.target.x, this.target.y);
-			this.ctx.lineTo(this.target.x + 20 + 10 * Math.sin(this.time), this.target.y);
-			this.ctx.closePath();
-			this.ctx.strokeStyle = "yellow";
-			this.ctx.stroke();
-			this.ctx.restore();
+			
+			this.drawWaypoint();
 			
 			//draw rocket
 			app.rocket.draw(this.ctx);
@@ -197,6 +194,7 @@ var app = app || {};
 		var y = startY;
 		
 		if(this.mode == this.GAME_MODE.SEA) {
+			y = this.HEIGHT / 10 * 9;
 			for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
 				var noise = perlin(x, 50);
 				this.mountainPeaks[x] = y;
@@ -223,6 +221,10 @@ var app = app || {};
 			}
 			this.target.x = startIndex * this.mountainIndex + (rand * this.mountainIndex / 2);
 			this.target.y = this.clearHeight;
+		} else if(this.mode == this.GAME_MODE.SEA) {
+			var rand = map_range(Math.random(), 0, 1, this.WIDTH / 5, this.WIDTH / 5 * 4);
+			this.target.x = rand - rand % this.mountainIndex;
+			this.target.y = y;
 		}
 	},
 	
@@ -240,7 +242,9 @@ var app = app || {};
 	
 	didLandSafely: function(rocket) {
 		var closestPeakIndex = Math.floor(rocket.position.x);
-		if(Math.abs(rocket.position.y - this.mountainPeaks[closestPeakIndex]) > this.landDifferential) {
+		closestPeakIndex -= closestPeakIndex % this.mountainIndex;
+		if(Math.abs(rocket.position.y - this.mountainPeaks[closestPeakIndex] - rocket.height) > this.landDifferential
+			&& Math.abs(rocket.position.x - this.target.x) < 50 ) {
 			if(rocket.velocity.y>=25){
 				return false;
 			}
@@ -268,7 +272,7 @@ var app = app || {};
 				this.ctx.font=" 40px monospace";
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
-				this.ctx.fillText("Press E to start", this.WIDTH/2,this.HEIGHT/2 )
+				this.ctx.fillText("Press M for Mountain or S for sea", this.WIDTH/2,this.HEIGHT/2 )
 				break;
 			
 			case this.GAME_STATE.DEFAULT:
@@ -313,13 +317,17 @@ var app = app || {};
 		} else if (this.mode == this.GAME_MODE.SEA) {
 			this.ctx.moveTo(0, this.HEIGHT);
 			this.ctx.lineTo(0, this.mountainPeaks[0] + 2 * Math.sin(this.time));
+			this.mountainPeaks[this.mountainPeaks.length - 1] = this.target.y + 4 * Math.sin(this.time);
 		} else {
 			this.ctx.moveTo(0, this.mountainPeaks[0]);
 		}
 		for (var x = 0; x < this.WIDTH; x+= this.mountainIndex) {
 			var noise = perlin(x, 50);
 			if(this.mode == this.GAME_MODE.SEA) {
-				this.ctx.quadraticCurveTo(x + (10) * Math.cos(this.time), this.mountainPeaks[x] + ( 10) * Math.sin(this.time),x + (20) * Math.cos(this.time), this.mountainPeaks[x + this.mountainIndex] );
+				x + this.mountainIndex < this.mountainPeaks.length 
+				? this.ctx.quadraticCurveTo(x, this.mountainPeaks[x] ,x + this.mountainIndex, this.mountainPeaks[x + this.mountainIndex] )
+				: this.ctx.quadraticCurveTo(x, this.mountainPeaks[x] ,x + this.mountainIndex, this.mountainPeaks[x] )
+				this.mountainPeaks[x] = this.mountainPeaks[x + this.mountainIndex];
 			} else {
 				this.ctx.lineTo(x, this.mountainPeaks[x]);
 			}
@@ -336,6 +344,47 @@ var app = app || {};
 		this.ctx.closePath();
 		this.ctx.strokeStyle = "black";
 		this.ctx.stroke();
+		
+		this.ctx.restore();
+	},
+	
+	drawWaypoint: function() {
+		this.ctx.save();
+		this.ctx.beginPath();
+		if(this.mode == this.GAME_MODE.MOUNTAIN) {
+			this.ctx.moveTo(this.target.x - 20 - 10 * Math.sin(this.time), this.target.y);
+			this.ctx.lineTo(this.target.x, this.target.y);
+			this.ctx.lineTo(this.target.x, this.target.y - 20 - 10 * Math.sin(this.time));
+			this.ctx.lineTo(this.target.x, this.target.y);
+			this.ctx.lineTo(this.target.x + 20 + 10 * Math.sin(this.time), this.target.y);
+		} else if(this.mode == this.GAME_MODE.SEA) {
+			this.ctx.moveTo(this.target.x - 20 - 10 * Math.sin(this.time), this.mountainPeaks[this.target.x - 20] - 1);
+			this.ctx.lineTo(this.target.x, this.mountainPeaks[this.target.x] - 1);
+			this.ctx.lineTo(this.target.x, this.mountainPeaks[this.target.x - 20] - 20 * Math.abs(Math.sin(this.time)) - 10 - 1);
+			this.ctx.lineTo(this.target.x, this.mountainPeaks[this.target.x] - 1);
+			this.ctx.lineTo(this.target.x + 20 + 10 * Math.sin(this.time), this.mountainPeaks[this.target.x + 20] - 1);
+		}
+		this.ctx.closePath();
+		this.ctx.strokeStyle = "yellow";
+		this.ctx.stroke();
+		
+		if(this.mode == this.GAME_MODE.SEA) {
+			this.ctx.beginPath();
+			var size = 8 * this.mountainIndex;
+			this.ctx.moveTo(this.target.x - size, this.mountainPeaks[this.target.x - size] + 10);
+			this.ctx.lineTo(this.target.x - size, this.mountainPeaks[this.target.x - size]);
+			
+			this.ctx.lineTo(this.target.x + size, this.mountainPeaks[this.target.x + size]);
+			this.ctx.lineTo(this.target.x + size, this.mountainPeaks[this.target.x + size] + 10);
+			
+			this.ctx.lineTo(this.target.x - size, this.mountainPeaks[this.target.x - size] + 10);
+			
+			this.ctx.strokeStyle = "black";
+			this.ctx.closePath();
+			this.ctx.stroke();
+			this.ctx.fillStyle = "gray";
+			this.ctx.fill();
+		}
 		
 		this.ctx.restore();
 	}
