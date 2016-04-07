@@ -61,7 +61,7 @@ function initWebGL(canvasID, glCanvasID) {
 	var textureCtx = textureCanvas.getContext( '2d' );
 	
 	textureCanvas.width  = 1024,
-    textureCanvas.height = 1024
+    textureCanvas.height = 512
 	textureCanvas.style.display = 'none';
 	canvas.width = textureCanvas.width;
 	canvas.height = textureCanvas.height;
