@@ -46,7 +46,5 @@ window.addEventListener("keyup",function(e){
 			app.main.pauseGame();
 		}
 	}
-	if(char=='d'|| char =='D'){
-		app.main.toggleDebug();
-	}
+	
 });

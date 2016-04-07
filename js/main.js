@@ -11,7 +11,7 @@
 var app = app || {};
 
 /*
- .main is an object literal that is a proaperty of the app global
+ .main is an object literal that is a property of the app global
  This object literal has its own properties and methods (functions)
  
  */
@@ -120,12 +120,12 @@ var app = app || {};
 			//collect input
 			//change gimbal position
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
-			if(myKeys.keydown[myKeys.KEYBOARD.KEY_D]) app.rocket.changeGimbal(15, dt);
+			if(!app.rocket.autopilot) if(myKeys.keydown[myKeys.KEYBOARD.KEY_D]) app.rocket.changeGimbal(15, dt);
 			//if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
 			
 			//check for throttle
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
-			//if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
+			if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
 			// TODO: Make a different control scheme or toggle for this as it breaks AI controls
 			
 			

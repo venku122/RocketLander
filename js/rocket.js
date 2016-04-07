@@ -34,7 +34,7 @@ var GRAVITY = new Victor(0,9.81);
 	 MIN_THROTTLE: .55,
 	 MAX_THROTTLE: 1.0,
 	 isThrottle: false,
-	 GIMBAL_RANGE: 15,
+	 GIMBAL_RANGE: 10,
 	 GIMBAL_RESPONSE: 7,
 	 currentGimbal: 0,
 	 
@@ -46,20 +46,22 @@ var GRAVITY = new Victor(0,9.81);
 	 //api variables
 	 ctx: undefined,
 	 debug: false,
-	 SCALE_FACTOR: 1.5,
+	 SCALE_FACTOR: 10,
 	 
 	 //graphics
 	 ROCKET_SPRITE: {
 		 DEPLOYED: new Image(),
 		 STOWED: new Image()
 	 },
-	aiFunctions: [],
+	 //autopilot
+	 autopilot: false,
+	 aiFunctions: [],
 	 
 	 
 	 
 	 
 	 init : function(images){
-		 debugger;
+		
 		 var rocket = app.rocket;
 		 console.log("app.rocket.init() called");
 		 
@@ -73,10 +75,11 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 
 		 // width/height with respect to images
-		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width;
-		 rocket.height = rocket.ROCKET_SPRITE.DEPLOYED.height;
+		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width / rocket.SCALE_FACTOR;;
+		 rocket.height = rocket.ROCKET_SPRITE.DEPLOYED.height / rocket.SCALE_FACTOR;
 		 
-		 
+
+		 //positional settings 
 		 rocket.position = new Victor(Draw.canvas.width/2,Draw.canvas.height/8);
 		 rocket.velocity = new Victor(0,0);
 		 rocket.centerOfMass = rocket.height /3 *2;
@@ -126,23 +129,22 @@ var GRAVITY = new Victor(0,9.81);
 			//block
 			ctx.fillRect(-5,-5,10,10);
 			
-
-			 
-
-			 
+			//CoM
+			ctx.fillRect(-2, 0,2, this.centerOfMass);
+			
 			 //thrust debug line
 			 //inverted to be more "logical"
 			 if(this.isThrottle){
 			 ctx.save();
+			 ctx.translate(0, this.centerOfMass);
 			 ctx.rotate(this.currentGimbal * Math.PI / 180);
-			 
 			 ctx.beginPath();
 			 ctx.strokeStyle="orange";
 			 ctx.moveTo(0,0);
 			 ctx.lineTo(-this.thrustAccel.x*this.SCALE_FACTOR, -this.thrustAccel.y*this.SCALE_FACTOR);
 			 ctx.stroke();
 			 ctx.restore();
-				}
+			 }
 			 
 
 			 
@@ -169,13 +171,27 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 //rocket body
 		 ctx.fillRect(0,0, this.width, this.height);
-		 //ctx.drawImage(this.ROCKET_SPRITE.DEPLOYED,0,0, this.width, this.height);
+		 ctx.drawImage(this.ROCKET_SPRITE.DEPLOYED,0,0, this.width, this.height);
 		 
+		 //thrust vector
+		 if(this.isThrottle){
+			 ctx.save();
+			 ctx.translate(this.width/2, this.height);
+			 ctx.rotate(this.currentGimbal * Math.PI / 180);
+			 ctx.beginPath();
+			 ctx.strokeStyle="orange";
+			 ctx.moveTo(0,0);
+			 ctx.lineTo(-this.thrustAccel.x*this.SCALE_FACTOR, -this.thrustAccel.y*this.SCALE_FACTOR);
+			 ctx.stroke();
+			 ctx.restore();
+			 }
+			 
 		 //rocket legs
+		 /*
 		 ctx.fillStyle="black";
 		 ctx.fillRect(this.width, this.height, 18,3);
 		 ctx.fillRect(this.width-18, this.height, 18,3);
-		 
+		 */
 		 ctx.restore();
 		 }
 		 
@@ -188,7 +204,7 @@ var GRAVITY = new Victor(0,9.81);
 		 //angular motion
 		 //torque = centerOfMass* Thrust * gimbal angle
 		 if(this.isThrottle){
-		 var torque = this.centerOfMass* this.thrust.clone().y * this.currentGimbal;
+		 var torque = (this.height - this.centerOfMass)* this.thrust.clone().y * this.currentGimbal;
 		 //acceleration = torque force / Moment of Inertia
 		 var angularAcceleration = torque / this.momentOfInertia;
 		 
@@ -216,7 +232,8 @@ var GRAVITY = new Victor(0,9.81);
 		 //update position
 		 this.position.add(this.velocity.clone().multiplyScalar(dt));
 		 
-		 this.runAI();
+		 if(this.autopilot) this.runAI();
+		 
 		 
 		 if(this.debug){
 			 console.log("rotation: " + this.rotation + " Angular Acceleration: " + angularAcceleration + " Torque: " + torque);
@@ -255,6 +272,15 @@ var GRAVITY = new Victor(0,9.81);
 		 if(this.debug){
 		 console.log("current gimbal position: " +this.currentGimbal);
 		 console.log(dt);
+		 }
+	 },
+	 
+	 changeRotation: function(targetValue, dt){
+		 var currentRotation = this.rotation;
+		 var dRot = targetValue - currentRotation;
+		 
+		 if(dRot>0){
+			 
 		 }
 	 },
 	 
