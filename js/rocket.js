@@ -50,34 +50,43 @@ var GRAVITY = new Victor(0,9.81);
 	 
 	 //graphics
 	 ROCKET_SPRITE: {
-		DEPLOYED: new Image(),
-		STOWED: new Image(),
-	},
-	
+		 DEPLOYED: new Image(),
+		 STOWED: new Image()
+	 },
 	aiFunctions: [],
 	 
 	 
 	 
 	 
-	 init : function(){
-		 //debugger;
+	 init : function(images){
+		 debugger;
+		 var rocket = app.rocket;
 		 console.log("app.rocket.init() called");
-		 this.position = new Victor(Draw.canvas.width/2,Draw.canvas.height/8);
-		 this.velocity = new Victor(0,0);
-		 this.centerOfMass = this.height /3 *2;
+		 
+		 //load images
+		 rocket.ROCKET_SPRITE.DEPLOYED.src = images.deployed.src;
+		 rocket.ROCKET_SPRITE.STOWED.src = images.stowed.src;
+		
+		 rocket.ROCKET_SPRITE.STOWED.crossOrigin = "anonymous";
+		 rocket.ROCKET_SPRITE.DEPLOYED.crossOrigin = "anonymous";
+		 
+		 
+		 
+		 // width/height with respect to images
+		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width;
+		 rocket.height = rocket.ROCKET_SPRITE.DEPLOYED.height;
+		 
+		 
+		 rocket.position = new Victor(Draw.canvas.width/2,Draw.canvas.height/8);
+		 rocket.velocity = new Victor(0,0);
+		 rocket.centerOfMass = rocket.height /3 *2;
 		 
 		//moment of inertia
 		//I of Rod(Center) = (mass*Length^2)/12
 		
-		 this.momentOfInertia = (this.currentMass * this.centerOfMass * this.centerOfMass)/12;
-		 
-		 //load images
-		 this.ROCKET_SPRITE.STOWED.crossOrigin = "anonymous";
-		 this.ROCKET_SPRITE.DEPLOYED.crossOrigin = "anonymous";
-		 this.ROCKET_SPRITE.DEPLOYED.src = "media/images/f9FirstStageLegsFins298x1254.png";
-		 this.ROCKET_SPRITE.STOWED.src = "media/images/f9FirstStageNoDeploy100x1198.png";
-		 
-		 this.aiFunctions = new Array();
+		 rocket.momentOfInertia = (rocket.currentMass * rocket.centerOfMass * rocket.centerOfMass)/12;
+
+		 rocket.aiFunctions = new Array();
 	 },
 	 
 	 //draws the rocket
