@@ -12,11 +12,17 @@ border: solid 1px black;
 </head>
 
 <body>
-<h1>Rocket Lander</h1>
 <canvas id='mainCanvas' style="display:none;">
 Get a real browser
 </canvas>
-<canvas id='gl'></canvas>
+	<div style="position: fixed;left:25%">
+		<canvas id='gl'></canvas>
+		<div style="float:right">
+			
+			
+			<button id='pauseResumeButton'>Pause</button>
+		</div>
+	</div>
 </body>
 
 <script src = 'shaders/shaders.js'></script>

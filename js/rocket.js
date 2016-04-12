@@ -76,7 +76,7 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 
 		 // width/height with respect to images
-		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width / rocket.SCALE_FACTOR;;
+		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width / rocket.SCALE_FACTOR;
 		 rocket.height = rocket.ROCKET_SPRITE.DEPLOYED.height / rocket.SCALE_FACTOR;
 		 
 

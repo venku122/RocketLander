@@ -18,10 +18,15 @@ window.onload = function(){
 		deployed: "media/images/f9FirstStageLegsFins298x1254.png",
 		stowed: "media/images/f9FirstStageNoDeploy100x1198.png"
 };
+	var buttonSources = {
+		sea: "media/images/SeaButton.png",
+		mountain: "media/images/MountainButton.png"
+	}
 	Draw.init();
 	initWebGL('mainCanvas', 'gl');
 	app.main.init();
 	loadImages(sources, app.rocket.init);
+	loadImages(buttonSources, app.main.imageLoader);
 	
 
 	

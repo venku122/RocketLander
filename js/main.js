@@ -49,6 +49,10 @@ var app = app || {};
 	clearHeight: 0,
 	time: 0,
 	target: {},
+	BUTTON_GRAPHICS: {
+		MOUNTAIN: new Image(),
+		SEA: new Image()
+	},
 	
 	init : function(){
 		if(this.debug) console.log("app.main.init() called");
@@ -87,6 +91,16 @@ var app = app || {};
 		this.update();
 	},
 	
+	imageLoader : function(images) {
+		var main = app.main;
+		main.BUTTON_GRAPHICS.SEA.src = images.sea.src;
+		main.BUTTON_GRAPHICS.MOUNTAIN.src = images.mountain.src;
+		
+		main.BUTTON_GRAPHICS.SEA.crossOrigin = "anonymous";
+		main.BUTTON_GRAPHICS.SEA.crossOrigin = "anonymous";
+		
+	},
+	
 	update : function(){
 		// 1) LOOP
 		// schedule a call to update()
@@ -108,12 +122,12 @@ var app = app || {};
 			this.drawUI();
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_M]) {
 				this.mode = this.GAME_MODE.MOUNTAIN;
-				this.generatePeaks(this.HEIGHT / 3 * 2);
+				this.generatePeaks(this.HEIGHT - 100);
 				this.state = this.GAME_STATE.DEFAULT;
 			}
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_S]) {
 				this.mode = this.GAME_MODE.SEA;
-				this.generatePeaks(this.HEIGHT / 3 * 2);
+				this.generatePeaks(this.HEIGHT  - 100);
 				this.state = this.GAME_STATE.DEFAULT;
 			}
 
@@ -138,10 +152,15 @@ var app = app || {};
 			
 			//update
 			app.rocket.update(dt);
-			if(this.checkForCollisions(app.rocket)) {
+			if(this.checkForCollisions(app.rocket) || this.timer != null) {
 				if( !this.didLandSafely(app.rocket) || this.timer != null){
 					shake(.005, 1);
-					app.rocket.velocity.y = 0;
+					if(this.mode != this.GAME_MODE.SEA)
+					{
+						app.rocket.velocity.y = 0;
+					} else {
+						
+					}
 					app.rocket.velocity.x = 0;
 					if(this.timer == null) {
 						this.timer = 1;
@@ -284,6 +303,7 @@ var app = app || {};
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
 				this.ctx.fillText("Press M for Mountain or S for sea", this.WIDTH/2,this.HEIGHT/2 )
+				this.drawButtons();
 				break;
 			
 			case this.GAME_STATE.DEFAULT:
@@ -409,6 +429,17 @@ var app = app || {};
 		}
 		
 		this.ctx.restore();
+	},
+	
+	drawButtons: function() {
+		var seaX, seaY;
+		seaX = 35;
+		seaY = this.HEIGHT / 3 * 2;
+		this.ctx.drawImage(this.BUTTON_GRAPHICS.SEA, seaX, seaY, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height);
+		this.ctx.strokeRect(seaX, seaY, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height )
+		
+		this.ctx.drawImage(this.BUTTON_GRAPHICS.MOUNTAIN, seaX + this.BUTTON_GRAPHICS.SEA.width + 50, seaY, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height);
+		this.ctx.strokeRect(seaX + this.BUTTON_GRAPHICS.SEA.width + 50, seaY, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height )
 	}
  }
  
