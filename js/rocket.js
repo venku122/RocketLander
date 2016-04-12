@@ -47,7 +47,8 @@ var GRAVITY = new Victor(0,9.81);
 	 ctx: undefined,
 	 debug: false,
 	 SCALE_FACTOR: 10,
-	 
+	 Emitter: undefined, // required - loaded by loader.js
+	 exhaust: undefined,
 	 //graphics
 	 ROCKET_SPRITE: {
 		 DEPLOYED: new Image(),
@@ -90,6 +91,12 @@ var GRAVITY = new Victor(0,9.81);
 		 rocket.momentOfInertia = (rocket.currentMass * rocket.centerOfMass * rocket.centerOfMass)/12;
 
 		 rocket.aiFunctions = new Array();
+		 
+		 rocket.exhaust = new rocket.Emitter();
+		 rocket.exhaust.numParticles =100;
+		 rocket.exhaust.red=255;
+		 rocket.exhaust.green=150;
+		 rocket.exhaust.createParticles({x:0, y:0});
 	 },
 	 
 	 //draws the rocket
@@ -175,6 +182,7 @@ var GRAVITY = new Victor(0,9.81);
 		 
 		 //thrust vector
 		 if(this.isThrottle){
+			
 			 ctx.save();
 			 ctx.translate(this.width/2, this.height);
 			 ctx.rotate(this.currentGimbal * Math.PI / 180);
@@ -183,15 +191,13 @@ var GRAVITY = new Victor(0,9.81);
 			 ctx.moveTo(0,0);
 			 ctx.lineTo(-this.thrustAccel.x*this.SCALE_FACTOR, -this.thrustAccel.y*this.SCALE_FACTOR);
 			 ctx.stroke();
+			 
+			  //exhaust
+			this.exhaust.draw(ctx);
 			 ctx.restore();
 			 }
 			 
-		 //rocket legs
-		 /*
-		 ctx.fillStyle="black";
-		 ctx.fillRect(this.width, this.height, 18,3);
-		 ctx.fillRect(this.width-18, this.height, 18,3);
-		 */
+		
 		 ctx.restore();
 		 }
 		 
@@ -233,6 +239,9 @@ var GRAVITY = new Victor(0,9.81);
 		 this.position.add(this.velocity.clone().multiplyScalar(dt));
 		 
 		 if(this.autopilot) this.runAI();
+		 
+		 //update exhaust
+		 this.exhaust.update({x: 0, y: 0}, dt, this.velocity);
 		 
 		 
 		 if(this.debug){

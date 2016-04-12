@@ -82,6 +82,7 @@ var app = app || {};
 				app.rocket.changeGimbal(.5, app.main.calculateDeltaTime());
 			}
 		});
+		app.rocket.Emitter = app.Emitter;
 		
 		this.update();
 	},
@@ -309,12 +310,14 @@ var app = app || {};
 				this.ctx.font=" 40px monospace";
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("The rocket has landed!", this.WIDTH/2,this.HEIGHT/3 );
+				this.ctx.fillText("Press space to Restart", this.WIDTH/2,this.HEIGHT/3 + 50 );
 			break;
 			case this.GAME_STATE.DESTROYED:
 				//draw menu text
 				this.ctx.font=" 40px monospace";
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("You were destroyed", this.WIDTH/2,this.HEIGHT/3 );
+				this.ctx.fillText("Press space to Restart", this.WIDTH/2,this.HEIGHT/3 + 50 );
 			break;
 		}
 	},
