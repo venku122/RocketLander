@@ -170,7 +170,7 @@ var GRAVITY = new Victor(0,9.81);
 		 ctx.rotate(this.rotation * Math.PI/180);
 		 
 		 //rocket body
-		 ctx.fillRect(0,0, this.width, this.height);
+		 //ctx.fillRect(0,0, this.width, this.height);
 		 ctx.drawImage(this.ROCKET_SPRITE.DEPLOYED,0,0, this.width, this.height);
 		 
 		 //thrust vector
@@ -302,6 +302,25 @@ var GRAVITY = new Victor(0,9.81);
 		 for(var i = 0; i < this.aiFunctions.length; i++) {
 			this.aiFunctions[i]();
 		 }
+	 },
+	 reset: function() {
+		 var rocket = app.rocket;
+		 // width/height with respect to images
+		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width / rocket.SCALE_FACTOR;;
+		 rocket.height = rocket.ROCKET_SPRITE.DEPLOYED.height / rocket.SCALE_FACTOR;
+		 
+
+		 //positional settings 
+		 rocket.position = new Victor(Draw.canvas.width/2,Draw.canvas.height/8);
+		 rocket.velocity = new Victor(0,0);
+		 rocket.centerOfMass = rocket.height /3 *2;
+		 
+		//moment of inertia
+		//I of Rod(Center) = (mass*Length^2)/12
+		
+		 rocket.momentOfInertia = (rocket.currentMass * rocket.centerOfMass * rocket.centerOfMass)/12;
+
+		 rocket.aiFunctions = new Array();
 	 }
 	 
 	 

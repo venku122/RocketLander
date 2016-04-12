@@ -177,11 +177,21 @@ var app = app || {};
 			case this.GAME_STATE.LANDED:
 				this.drawBG();
 				this.drawUI();
+				if(myKeys.keydown[myKeys.KEYBOARD.KEY_SPACE])
+				{
+					app.rocket.reset();
+					this.state = this.GAME_STATE.DEFAULT;
+				}
 			break;
 			
 			case this.GAME_STATE.DESTROYED:
 				this.drawBG();
 				this.drawUI();
+				if(myKeys.keydown[myKeys.KEYBOARD.KEY_SPACE])
+				{
+					app.rocket.reset();
+					this.state = this.GAME_STATE.DEFAULT
+				}
 			break;
 		}
 		
