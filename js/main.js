@@ -1,5 +1,5 @@
 // main.js
-// Dependencies: 
+// Dependencies:
 // Description: singleton object
 // This object will be our main "controller" class and will contain references
 // to most of the other objects in the game.
@@ -13,11 +13,11 @@ var app = app || {};
 /*
  .main is an object literal that is a property of the app global
  This object literal has its own properties and methods (functions)
- 
+
  */
  app.main = {
-	 
-	 
+
+
 	 //Game State Machine
 	GAME_STATE: Object.freeze({
 		START: 0,
@@ -31,7 +31,7 @@ var app = app || {};
 		SEA: 1,
 		DESSERT: 2
 	},
-	
+
 	 //Properties
 	canvas: undefined,
     ctx: undefined,
@@ -53,25 +53,28 @@ var app = app || {};
 		MOUNTAIN: new Image(),
 		SEA: new Image()
 	},
-	
+
 	init : function(){
 		if(this.debug) console.log("app.main.init() called");
+
+
+
 		// initialize properties
 		this.canvas = Draw.canvas;
 		this.WIDTH = Draw.canvas.width;
 		this.HEIGHT = Draw.canvas.height;
-		//this.canvas.width = this.WIDTH;
-		//this.canvas.height = this.HEIGHT;
+
 		this.ctx = this.canvas.getContext('2d');
-		
+
 		this.state = this.GAME_STATE.START;
-		
+
+
 		//set gradient
 		this.grd = this.ctx.createLinearGradient(135,206,250, this.HEIGHT),
 		this.grd.addColorStop(1, "skyblue"),
 		this.grd.addColorStop(0, "white"),
 		//this.grd = "skyblue";
-		
+
 		app.rocket.aiFunctions.push(function(){
 			if(app.rocket.position.y < app.main.target.y && app.rocket.velocity.y > 10) {
 				app.rocket.throttleOn(app.main.calculateDeltaTime());
@@ -87,20 +90,20 @@ var app = app || {};
 			}
 		});
 		app.rocket.Emitter = app.Emitter;
-		
+
 		this.update();
 	},
-	
+
 	imageLoader : function(images) {
 		var main = app.main;
 		main.BUTTON_GRAPHICS.SEA.src = images.sea.src;
 		main.BUTTON_GRAPHICS.MOUNTAIN.src = images.mountain.src;
-		
+
 		main.BUTTON_GRAPHICS.SEA.crossOrigin = "anonymous";
 		main.BUTTON_GRAPHICS.SEA.crossOrigin = "anonymous";
-		
+
 	},
-	
+
 	update : function(){
 		// 1) LOOP
 		// schedule a call to update()
@@ -108,33 +111,35 @@ var app = app || {};
 		//requestAnimationFrame(function(){this.update();});
 		//requestAnimationFrame(this.update.bind(this));
 		this.animationID = requestAnimationFrame(this.update.bind(this));
-		
+
 		if(myKeys.keydown[myKeys.KEYBOARD.KEY_U]){
 			this.debug=!this.debug;
 			app.rocket.debug = this.debug;
-		} 
-		
+		}
+
 		switch(this.state){
-			
+
 			case this.GAME_STATE.START:
-			
+
 			this.drawBG();
 			this.drawUI();
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_M]) {
 				this.mode = this.GAME_MODE.MOUNTAIN;
 				this.generatePeaks(this.HEIGHT - 100);
 				this.state = this.GAME_STATE.DEFAULT;
+        //app.audioHandler.playSound(app.audioHandler.SOUNDS.FLIGHT);
 			}
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_S]) {
 				this.mode = this.GAME_MODE.SEA;
 				this.generatePeaks(this.HEIGHT  - 100);
 				this.state = this.GAME_STATE.DEFAULT;
+        //app.audioHandler.playSound(app.audioHandler.SOUNDS.FLIGHT);
 			}
 
 			break;
-			
+
 			case this.GAME_STATE.DEFAULT:
-			
+
 			//get deltaTime
 			var dt = this.calculateDeltaTime();
 			this.time += dt;
@@ -143,15 +148,16 @@ var app = app || {};
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
 			if(!app.rocket.autopilot) if(myKeys.keydown[myKeys.KEYBOARD.KEY_D]) app.rocket.changeGimbal(15, dt);
 			if(!app.rocket.autopilot) if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
-			
+
 			//check for throttle
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
 			if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
 			// TODO: Make a different control scheme or toggle for this as it breaks AI controls
-			
-			
+
+
 			//update
 			app.rocket.update(dt);
+       if(this.state=this.GAME_STATE.DEFAULT){
 			if(this.checkForCollisions(app.rocket) || this.timer != null) {
 				if( !this.didLandSafely(app.rocket) || this.timer != null){
 					shake(.005, 1);
@@ -159,7 +165,7 @@ var app = app || {};
 					{
 						app.rocket.velocity.y = 0;
 					} else {
-						
+
 					}
 					app.rocket.velocity.x = 0;
 					if(this.timer == null) {
@@ -175,25 +181,26 @@ var app = app || {};
 					this.state = this.GAME_STATE.LANDED;
 				}
 			}
-			
+    }
+
 			//debugger;
-			// 5) DRAW	
+			// 5) DRAW
 				this.drawBG();
 				this.drawUI();
-			
+
 			//draw mountains
 			this.drawTerrain();
-			
-			
+
+
 			this.drawWaypoint();
-			
+
 			//draw rocket
 			app.rocket.draw(this.ctx);
-			
+
 			if(this.debug) console.log("Delta time: "+ dt);
 
 			break;
-			
+
 			case this.GAME_STATE.LANDED:
 				this.drawBG();
 				this.drawUI();
@@ -203,7 +210,7 @@ var app = app || {};
 					this.state = this.GAME_STATE.DEFAULT;
 				}
 			break;
-			
+
 			case this.GAME_STATE.DESTROYED:
 				this.drawBG();
 				this.drawUI();
@@ -214,22 +221,22 @@ var app = app || {};
 				}
 			break;
 		}
-		
-		
+
+
 		render();
 	},
-	
+
 	generatePeaks: function(startY){
 		this.mountainPeaks = new Array(this.width);
 		var y = startY;
-		
+
 		if(this.mode == this.GAME_MODE.SEA) {
 			y = this.HEIGHT / 10 * 9;
 			for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
 				var noise = perlin(x, 50);
 				this.mountainPeaks[x] = y;
 				//y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
-			}	
+			}
 		} else {
 			for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
 				var noise = perlin(x, 50);
@@ -237,7 +244,7 @@ var app = app || {};
 				y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
 			}
 		}
-		
+
 		if(this.mode == this.GAME_MODE.MOUNTAIN) {
 			var min = 15;
 			var range = 20;
@@ -257,19 +264,19 @@ var app = app || {};
 			this.target.y = y;
 		}
 	},
-	
+
 	calculateDeltaTime: function(){
 		// what's with (+ new Date) below?
-		// + calls Date.valueOf(), which converts it from an object to a 	
+		// + calls Date.valueOf(), which converts it from an object to a
 		// primitive (number of milliseconds since January 1, 1970 local time)
 		var now,fps;
-		now = (+new Date); 
+		now = (+new Date);
 		fps = 1000 / (now - this.lastTime);
 		fps = clamp(fps, 12, 60);
-		this.lastTime = now; 
+		this.lastTime = now;
 		return 1/fps;
 	},
-	
+
 	didLandSafely: function(rocket) {
 		var closestPeakIndex = Math.floor(rocket.position.x);
 		closestPeakIndex -= closestPeakIndex % this.mountainIndex;
@@ -281,7 +288,7 @@ var app = app || {};
 			return true;
 		}
 	},
-	
+
 	checkForCollisions: function(rocket) {
 		for(var i = 0; i < 3; i ++) {
 			var index = Math.floor(rocket.position.x) - (Math.floor(rocket.position.x + 5 * i) % 5)
@@ -290,13 +297,13 @@ var app = app || {};
 			}
 		}
 		return false;
-		
+
 	},
-	
+
 	drawUI: function(){
-		
+
 		switch(this.state){
-			
+
 			case this.GAME_STATE.START:
 				//draw menu text
 				this.ctx.font=" 40px monospace";
@@ -305,7 +312,7 @@ var app = app || {};
 				this.ctx.fillText("Press M for Mountain or S for sea", this.WIDTH/2,this.HEIGHT/2 )
 				this.drawButtons();
 				break;
-			
+
 			case this.GAME_STATE.DEFAULT:
 				this.ctx.font=" 20px monospace";
 				this.ctx.textAlign = "center";
@@ -341,15 +348,15 @@ var app = app || {};
 			break;
 		}
 	},
-	
+
 	drawBG: function(){
 		// i) draw background
 		this.ctx.save();
-		this.ctx.fillStyle = this.grd; 
-		this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT); 
+		this.ctx.fillStyle = this.grd;
+		this.ctx.fillRect(0,0,this.WIDTH,this.HEIGHT);
 		this.ctx.restore();
 	},
-	
+
 	drawTerrain: function(){
 		this.ctx.save();
 		this.ctx.beginPath();
@@ -366,7 +373,7 @@ var app = app || {};
 		for (var x = 0; x < this.WIDTH; x+= this.mountainIndex) {
 			var noise = perlin(x, 50);
 			if(this.mode == this.GAME_MODE.SEA) {
-				x + this.mountainIndex < this.mountainPeaks.length 
+				x + this.mountainIndex < this.mountainPeaks.length
 				? this.ctx.quadraticCurveTo(x, this.mountainPeaks[x] ,x + this.mountainIndex, this.mountainPeaks[x + this.mountainIndex] )
 				: this.ctx.quadraticCurveTo(x, this.mountainPeaks[x] ,x + this.mountainIndex, this.mountainPeaks[x] )
 				this.mountainPeaks[x] = this.mountainPeaks[x + this.mountainIndex];
@@ -386,10 +393,10 @@ var app = app || {};
 		this.ctx.closePath();
 		this.ctx.strokeStyle = "black";
 		this.ctx.stroke();
-		
+
 		this.ctx.restore();
 	},
-	
+
 	drawWaypoint: function() {
 		this.ctx.save();
 		this.ctx.beginPath();
@@ -409,46 +416,46 @@ var app = app || {};
 		this.ctx.closePath();
 		this.ctx.strokeStyle = "yellow";
 		this.ctx.stroke();
-		
+
 		if(this.mode == this.GAME_MODE.SEA) {
 			this.ctx.beginPath();
 			var size = 8 * this.mountainIndex;
 			this.ctx.moveTo(this.target.x - size, this.mountainPeaks[this.target.x - size] + 10);
 			this.ctx.lineTo(this.target.x - size, this.mountainPeaks[this.target.x - size]);
-			
+
 			this.ctx.lineTo(this.target.x + size, this.mountainPeaks[this.target.x + size]);
 			this.ctx.lineTo(this.target.x + size, this.mountainPeaks[this.target.x + size] + 10);
-			
+
 			this.ctx.lineTo(this.target.x - size, this.mountainPeaks[this.target.x - size] + 10);
-			
+
 			this.ctx.strokeStyle = "black";
 			this.ctx.closePath();
 			this.ctx.stroke();
 			this.ctx.fillStyle = "gray";
 			this.ctx.fill();
 		}
-		
+
 		this.ctx.restore();
 	},
-	
+
 	drawButtons: function() {
 		var seaX, seaY;
 		seaX = 35;
 		seaY = this.HEIGHT / 3 * 2;
 		this.ctx.drawImage(this.BUTTON_GRAPHICS.SEA, seaX, seaY, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height);
 		this.ctx.strokeRect(seaX, seaY, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height )
-		
+
 		this.ctx.drawImage(this.BUTTON_GRAPHICS.MOUNTAIN, seaX + this.BUTTON_GRAPHICS.SEA.width + 50, seaY, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height);
 		this.ctx.strokeRect(seaX + this.BUTTON_GRAPHICS.SEA.width + 50, seaY, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height )
 	}
  }
- 
+
  /*
 Function Name: clamp(val, min, max)
 Author: Web - various sources
 Return Value: the constrained value
 Description: returns a value that is
-constrained between min and max (inclusive) 
+constrained between min and max (inclusive)
 */
 function clamp(val, min, max){
 	return Math.max(min, Math.min(max, val));

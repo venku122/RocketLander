@@ -1,7 +1,7 @@
 /*
 loader.js
 variable 'app' is in global scope - i.e. a property of window.
-app is our single global object literal - all other functions and properties of 
+app is our single global object literal - all other functions and properties of
 the game will be properties of app.
 */
 "use strict";
@@ -21,15 +21,16 @@ window.onload = function(){
 	var buttonSources = {
 		sea: "media/images/SeaButton.png",
 		mountain: "media/images/MountainButton.png"
-	}
+	};
 	Draw.init();
 	initWebGL('mainCanvas', 'gl');
+	app.audioHandler.init();
 	app.main.init();
 	loadImages(sources, app.rocket.init);
 	loadImages(buttonSources, app.main.imageLoader);
-	
 
-	
+
+
 };
 
 //load images function from html5 canvas tutorials
@@ -52,7 +53,7 @@ function loadImages(sources, callback){
 			}
 		};
 		images[src].src = sources[src];
-		
+
 	}
 	//callback(images);
 }
