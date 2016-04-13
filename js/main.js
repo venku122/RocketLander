@@ -24,7 +24,8 @@ var app = app || {};
 		DEFAULT: 1,
 		LANDED: 2,
 		DESTROYED: 3,
-		OPTIONS: 4
+		OPTIONS: 4,
+    SPLASH: 5
 	}),
 	GAME_MODE: {
 		MOUNTAIN: 0,
@@ -36,6 +37,7 @@ var app = app || {};
 	canvas: undefined,
     ctx: undefined,
 	debug: false,
+  timer: 0,
 	animationID: 0,
 	HEIGHT: 500,
 	WIDTH: 500,
@@ -66,7 +68,9 @@ var app = app || {};
 
 		this.ctx = this.canvas.getContext('2d');
 
-		this.state = this.GAME_STATE.START;
+	//	this.state = this.GAME_STATE.START;
+
+    this.state = this.GAME_STATE.SPLASH;
 
 
 		//set gradient
@@ -112,12 +116,23 @@ var app = app || {};
 		//requestAnimationFrame(this.update.bind(this));
 		this.animationID = requestAnimationFrame(this.update.bind(this));
 
+    var dt = this.calculateDeltaTime();
+    this.time += dt;
+
 		if(myKeys.keydown[myKeys.KEYBOARD.KEY_U]){
 			this.debug=!this.debug;
 			app.rocket.debug = this.debug;
 		}
 
 		switch(this.state){
+
+      case this.GAME_STATE.SPLASH:
+      this.drawBG();
+      app.rocket.drawSplash(this.ctx, dt);
+      this.drawUI();
+      this.timer+= dt;
+      if(this.timer>= 5) this.state = this.GAME_STATE.START;
+      break;
 
 			case this.GAME_STATE.START:
 
@@ -141,8 +156,7 @@ var app = app || {};
 			case this.GAME_STATE.DEFAULT:
 
 			//get deltaTime
-			var dt = this.calculateDeltaTime();
-			this.time += dt;
+
 			//collect input
 			//change gimbal position
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
@@ -303,6 +317,10 @@ var app = app || {};
 	drawUI: function(){
 
 		switch(this.state){
+
+      case this.GAME_STATE.SPLASH:
+
+      break;
 
 			case this.GAME_STATE.START:
 				//draw menu text
