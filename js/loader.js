@@ -27,6 +27,7 @@ window.onload = function(){
 	app.audioHandler.init();
 	app.main.init();
 	loadImages(sources, app.rocket.init);
+	
 	loadImages(buttonSources, app.main.imageLoader);
 	app.inputHandler.init();
 

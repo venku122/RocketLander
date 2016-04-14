@@ -76,16 +76,14 @@ var app = app || {};
 		this.uicanvas = document.getElementById('uiCanvas');
 		this.uictx = this.uicanvas.getContext('2d');
 
-		this.state = this.GAME_STATE.START; //Enable while testing
-		//this.state = this.GAME_STATE.SPLASH;
+		//this.state = this.GAME_STATE.START; //Enable while testing
+		this.state = this.GAME_STATE.SPLASH;
 
 
 		//set gradient
 		this.grd = this.ctx.createLinearGradient(135,206,250, this.HEIGHT),
 		this.grd.addColorStop(1, "skyblue"),
 		this.grd.addColorStop(0, "white"),
-		//this.grd = "skyblue";
-
 		app.rocket.Emitter = app.Emitter;
 
 
@@ -98,6 +96,16 @@ var app = app || {};
 			} else {
 				app.main.PAUSED = true;
 				e.target.textContent = "Un-Pause"
+			}
+		}
+		var aiButton = document.getElementById("autoPilot");
+		aiButton.onclick = function(e){
+			if(app.rocket.autopilot) {
+				app.rocket.autopilot = false;
+				e.target.textContent = "Engage Auto Pilot"
+			} else {
+				app.rocket.autopilot = true;
+				e.target.textContent = "Disable Auto Pilot"
 			}
 		}
 
@@ -176,8 +184,22 @@ var app = app || {};
 				if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
 				if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
 				// TODO: Make a different control scheme or toggle for this as it breaks AI controls
-
-
+	
+				if(app.rocket.autopilot == true) {
+					if(this.target.x > app.rocket.position.x + 20) {
+						app.rocket.changeGimbal(-5, dt);
+					} else if(this.target.x < app.rocket.position.x - 20) {
+						app.rocket.changeGimbal(5, dt);
+					} else {
+						app.rocket.changeGimbal(0, dt);
+					}
+					if(app.rocket.velocity.length() > this.maxLandingVelocity - 5) {
+						app.rocket.throttleOn();
+					} else {
+						app.rocket.throttleOff();
+					}
+				}
+				
 				//update
 				app.rocket.update(dt);
 			}
@@ -593,7 +615,7 @@ var app = app || {};
 				radius: 100,
 				fuelBound: 1,
 			}
-			var fuelPercentage = app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal);
+			var fuelPercentage = app.rocket.fuelPercentage;
 			if(fuelPercentage < 0) {
 				fuelPercentage = 0;
 			}
@@ -743,21 +765,6 @@ var app = app || {};
 
  }
  
- /*
- app.rocket.aiFunctions.push(function(){
-	if(app.rocket.position.y < app.main.target.y && app.rocket.velocity.y > 10) {
-		app.rocket.throttleOn(app.main.calculateDeltaTime());
-	} else {
-		app.rocket.throttleOff(app.main.calculateDeltaTime());
-	}
-});
-app.rocket.aiFunctions.push(function(){
-	if(app.rocket.position.x < app.main.target.x && app.rocket.rotation < Math.PI / 4) {
-		app.rocket.changeGimbal(-.5, app.main.calculateDeltaTime());
-	} else if(app.rocket.position.x > app.main.target.x && app.rocket.rotation < Math.PI / 4){
-		app.rocket.changeGimbal(.5, app.main.calculateDeltaTime());
-	}
-});*/
  app.inputHandler = {
 	 leftHand: undefined,
 	 rightHand: undefined,
@@ -769,25 +776,42 @@ app.rocket.aiFunctions.push(function(){
 	 addCommandButton: undefined,
 	 
 	 init: function() {
-		 this.leftHand = document.getElementById('leftHand');
-		 this.rightHand = document.getElementById('rightHand');
-		 this.operator = document.getElementById('operator');
-		 this.effect = document.getElementById('effect');
-		 this.enableNode = document.getElementById('enableNode');
-		 this.disableNode = document.getElementById('disableNode');
-		 this.checkBox = document.getElementById('enableCheckBox');
-		 this.addCommandButton = document.getElementById('addCommandNode');
+		 //TODO: Rethink this.  There are some things in here that are good in theory but don't work in practice
+		 //this.leftHand = document.getElementById('leftHand');
+		 //this.rightHand = document.getElementById('rightHand');
+		 //this.operator = document.getElementById('operator');
+		 //this.effect = document.getElementById('effect');
+		 //this.enableNode = document.getElementById('enableNode');
+		 //this.disableNode = document.getElementById('disableNode');
+		 //this.checkBox = document.getElementById('enableCheckBox');
+		 //this.addCommandButton = document.getElementById('addCommandNode');
 		 
-		 this.addCommandButton.onclick = this.processInputs;
+		 //this.addCommandButton.onclick = this.processInputs;
 	 },
 	 
 	 processInputs: function(){
 		 var leftHandValue = app.inputHandler.handleOperands(app.inputHandler.leftHand.value);
 		 var rightHandValue = app.inputHandler.handleOperands(app.inputHandler.rightHand.value);
 		 
-		 switch(app.inputHandler.operator) {
+		 switch(app.inputHandler.operator.value) {
 			 case"==":
-			 
+				switch(app.inputHandler.effect.value) {
+						case "TH":
+						app.rocket.aiFunctions.push(function(){
+							if(leftHandValue == rightHandValue ) {
+										app.rocket.throttleOn();
+								}
+							});
+						break;
+						case "RC":
+						app.rocket.aiFunctions.push(function(){
+							if(leftHandValue == rightHandValue ) {
+										app.rocket.gimbal(1);
+								}
+							});
+						break;
+						
+					}
 			 break;
 			 case"!=":
 			 
@@ -840,7 +864,7 @@ app.rocket.aiFunctions.push(function(){
 			return app.main.maxLandingVelocity;
 			break;
 			case "FL" :
-			return app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal)
+			return app.rocket.fuelPercentage;
 			break;
 			case "0"  :
 			return 0;
@@ -889,6 +913,36 @@ app.rocket.aiFunctions.push(function(){
 			break;
 			default:
 			return 0;
+		 }
+	 },
+	 
+	 handleNodeNumber: function(value){
+		 switch(value) {
+			 case "NO" :
+			 return -1;
+			 case "N1" :
+			 return 0;
+			 case "N2" :
+			 return 1;
+			 case "N3" :
+			 return 2;
+			 case "N4" :
+			 return 3;
+			 case "N5" :
+			 return 4;
+			 case "N6" :
+			 return 5;
+			 case "N7" :
+			 return 6;
+			 case "N8" :
+			 return 7;
+			 case "N9" :
+			 return 8;
+			 case "N10":
+			 return 9;
+			 default:
+			 return -1;
+			 
 		 }
 	 }
 	 

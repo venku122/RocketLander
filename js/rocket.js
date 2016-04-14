@@ -68,6 +68,7 @@ var GRAVITY = new Victor(0,9.81);
 	 //autopilot
 	 autopilot: false,
 	 aiFunctions: [],
+	 enabledNodes: [10],
 
    //convenience variables
    burnSecondsRemaining: -1,
@@ -108,7 +109,7 @@ var GRAVITY = new Victor(0,9.81);
      //x2 = CoM of column of fuel
      //x3 = CoM of tank
      //CoM = (m1x1 + m2x2 + m3x3) / m1 + m2 + m3
-     debugger;
+
      rocket.engineMass = (9 * .500) + 8; // 9 engines at 500kg plus tons of thrust structure
      rocket.tankMass = rocket.massFinal - rocket.engineMass;
      rocket.fuelLevel = (rocket.fuel * rocket.density2D) / (rocket.width);
@@ -144,6 +145,7 @@ var GRAVITY = new Victor(0,9.81);
 		 rocket.exhaust.red=255;
 		 rocket.exhaust.green=150;
 		 rocket.exhaust.createParticles({x:0, y:0});
+		 
 	 },
 
 	 //draws the rocket
