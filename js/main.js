@@ -137,7 +137,7 @@ var app = app || {};
       app.rocket.drawSplash(this.ctx, dt);
       this.drawUI();
       this.timer+= dt;
-      if(this.timer>= 5) this.state = this.GAME_STATE.START;
+      if(this.timer>= 5 || myKeys.keydown[myKeys.KEYBOARD.KEY_ENTER]) this.state = this.GAME_STATE.START;
       break;
 
 			case this.GAME_STATE.START:
@@ -148,13 +148,13 @@ var app = app || {};
 				this.mode = this.GAME_MODE.MOUNTAIN;
 				this.generatePeaks(this.HEIGHT - 100);
 				this.state = this.GAME_STATE.DEFAULT;
-        //app.audioHandler.playSound(app.audioHandler.SOUNDS.FLIGHT);
+				//app.audioHandler.playSound(app.audioHandler.SOUNDS.FLIGHT);
 			}
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_S]) {
 				this.mode = this.GAME_MODE.SEA;
 				this.generatePeaks(this.HEIGHT  - 100);
 				this.state = this.GAME_STATE.DEFAULT;
-        //app.audioHandler.playSound(app.audioHandler.SOUNDS.FLIGHT);
+				//app.audioHandler.playSound(app.audioHandler.SOUNDS.FLIGHT);
 			}
 
 			break;
@@ -330,7 +330,9 @@ var app = app || {};
 				this.ctx.font=" 40px monospace";
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
-				this.ctx.fillText("Press M for Mountain or S for sea", this.WIDTH/2,this.HEIGHT/2 )
+				//this.ctx.fillText("Press M for Mars or S for sea", this.WIDTH/2,this.HEIGHT/2 )
+        this.ctx.fillText("Ocean", 85, this.HEIGHT-175);
+        this.ctx.fillText("Mars", 85 + 250, this.HEIGHT-175);
 				this.drawButtons();
 				break;
 
@@ -369,23 +371,26 @@ var app = app || {};
 					height:	200,
 					fuelGradient: null
 				}
-				var tempPercentage = 0.0;
+				var fuelPercentage = app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal)
 				
-				// TODO: Once fuel has been added change the color to go from green to white, to red to white
-				this.fuelIndicator.fuelGradient = 
-							this.ctx.createLinearGradient(this.fuelIndicator.X, this.fuelIndicator.Y,
+				if(fuelPercentage > 0.2) {
+					this.fuelIndicator.fuelGradient = 
+						this.ctx.createLinearGradient(this.fuelIndicator.X, this.fuelIndicator.Y,
+																this.fuelIndicator.X, 
+																this.fuelIndicator.Y + this.fuelIndicator.height);
+					this.fuelIndicator.fuelGradient.addColorStop(1, "red");
+					this.fuelIndicator.fuelGradient.addColorStop(.8, "green");
+					this.fuelIndicator.fuelGradient.addColorStop(1 - fuelPercentage, "white");
+				}
+				else
+				{
+					this.fuelIndicator.fuelGradient = 
+						this.ctx.createLinearGradient(this.fuelIndicator.X, this.fuelIndicator.Y,
 														this.fuelIndicator.X, 
 														this.fuelIndicator.Y + this.fuelIndicator.height);
-							this.fuelIndicator.fuelGradient.addColorStop(1, "red");
-							this.fuelIndicator.fuelGradient.addColorStop(.8, "green");
-							this.fuelIndicator.fuelGradient.addColorStop(tempPercentage, "white");
-				//if fuel is less than 20%
-				/*this.fuelIndicator.fuelGradient = 
-							this.ctx.createLinearGradient(this.fuelIndicator.X, this.fuelIndicator.Y,
-														this.fuelIndicator.X, 
-														this.fuelIndicator.Y + this.fuelIndicator.height);
-							this.fuelIndicator.fuelGradient.addColorStop(1, "red");
-							this.fuelIndicator.fuelGradient.addColorStop(tempPercentage, "white");*/			
+					this.fuelIndicator.fuelGradient.addColorStop(1, "red");
+					this.fuelIndicator.fuelGradient.addColorStop(1 - fuelPercentage, "white");	
+				}							
 				
 				this.ctx.fillStyle = this.fuelIndicator.fuelGradient;
 				this.ctx.fillRect(this.fuelIndicator.X, this.fuelIndicator.Y,
