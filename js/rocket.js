@@ -18,10 +18,14 @@ var GRAVITY = new Victor(0,9.81);
 	 height: 41.2,
 	 rotation: 0,
 //	 massInitial: 409.5,
-   massInitial: 25.0,
-	 massFinal: 22.2,
-	 currentMass: 22.2,
-	 centerOfMass: this.height/3 * 2,
+   massInitial: 32.0,
+	 massFinal: 25.6,
+	 currentMass: undefined,
+   engineMass : undefined,
+   tankMass: undefined,
+	 centerOfMass: undefined,
+   density2D: 3.205,
+   fuelLevel: -1,
    fuel: -1,
 	 //moment of inertia
 	 //I of Rod(Center) = (mass*Length^2)/12
@@ -54,14 +58,21 @@ var GRAVITY = new Victor(0,9.81);
 	 SCALE_FACTOR: 10,
 	 Emitter: undefined, // required - loaded by loader.js
 	 exhaust: undefined,
+
 	 //graphics
 	 ROCKET_SPRITE: {
 		 DEPLOYED: new Image(),
 		 STOWED: new Image()
 	 },
+
 	 //autopilot
 	 autopilot: false,
 	 aiFunctions: [],
+
+   //convenience variables
+   burnSecondsRemaining: -1,
+   fuelPercentage: 1.0,
+   fuelInitial: -1,
 
 
 
@@ -78,8 +89,6 @@ var GRAVITY = new Victor(0,9.81);
 		 rocket.ROCKET_SPRITE.STOWED.crossOrigin = "anonymous";
 		 rocket.ROCKET_SPRITE.DEPLOYED.crossOrigin = "anonymous";
 
-
-
 		 // width/height with respect to images
 		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width / rocket.SCALE_FACTOR;
 		 rocket.height = rocket.ROCKET_SPRITE.DEPLOYED.height / rocket.SCALE_FACTOR;
@@ -90,7 +99,25 @@ var GRAVITY = new Victor(0,9.81);
 		 rocket.velocity = new Victor(0,0);
      rocket.fuel = rocket.massInitial - rocket.massFinal;
      rocket.currentMass = rocket.massInitial;
-		 rocket.centerOfMass = rocket.height /3 *2;
+
+     //center of mass calcultions
+     //m1 = engineMass
+     //m2 = fuelMass
+     //m3 = tankMass
+     //x1 = engines at origin
+     //x2 = CoM of column of fuel
+     //x3 = CoM of tank
+     //CoM = (m1x1 + m2x2 + m3x3) / m1 + m2 + m3
+     debugger;
+     rocket.engineMass = (9 * .500) + 8; // 9 engines at 500kg plus tons of thrust structure
+     rocket.tankMass = rocket.massFinal - rocket.engineMass;
+     rocket.fuelLevel = (rocket.fuel * rocket.density2D) / (rocket.width);
+     rocket.centerOfMass = rocket.height -
+     ((rocket.engineMass * 0) +
+     (rocket.fuel * (rocket.fuelLevel / 2) +
+     (rocket.tankMass * (rocket.height / 2))))/
+     (rocket.massFinal + rocket.fuel);
+		 //rocket.centerOfMass = rocket.height /3 *2;
 
      //positionl vetors
      rocket.rocketTop = rocket.position.clone().addScalarX(rocket.width/2);
@@ -98,13 +125,20 @@ var GRAVITY = new Victor(0,9.81);
      rocket.rocketBottom.add(new Victor(0, rocket.height));
      rocket.rocketBottom.rotateDeg(rocket.rotation);
 
+     //convenience variables ( for UI)
+     rocket.burnSecondsRemaining = rocket.fuel / rocket.massFlowRate;
+     rocket.fuelInitial = rocket.massInitial - rocket.massFinal;
+     rocket.fuelPercentage = rocket.fuel / rocket.fuelInitial;
+
+
 		//moment of inertia
 		//I of Rod(Center) = (mass*Length^2)/12
-
 		 rocket.momentOfInertia = (rocket.currentMass * rocket.centerOfMass * rocket.centerOfMass)/12;
 
+     //AI initialization
 		 rocket.aiFunctions = new Array();
 
+     //exhaust particle effects
 		 rocket.exhaust = new rocket.Emitter();
 		 rocket.exhaust.numParticles =100;
 		 rocket.exhaust.red=255;
@@ -229,6 +263,12 @@ var GRAVITY = new Victor(0,9.81);
 		 //angular motion
 		 //torque = centerOfMass* Thrust * gimbal angle
 		 if(this.isThrottle){
+       this.fuelLevel = (this.fuel * this.density2D) / (this.width);
+       this.centerOfMass = this.height -
+       ((this.engineMass * 0) +
+       (this.fuel * (this.fuelLevel / 2) +
+       (this.tankMass * (this.height / 2))))/
+       (this.massFinal + this.fuel);
 		 var torque = (this.height - this.centerOfMass)* this.thrust.clone().y * this.currentGimbal;
 		 //acceleration = torque force / Moment of Inertia
 		 var angularAcceleration = torque / this.momentOfInertia;
@@ -246,6 +286,7 @@ var GRAVITY = new Victor(0,9.81);
 		 //calculate thrust force
 		 if(this.isThrottle){
        this.fuel-= (this.massFlowRate * dt * this.throttle);
+       if(this.fuel <=0) this.throttleOff();
        this.currentMass = this.massFinal + this.fuel;
 		 this.thrustAccel = this.thrust.clone().rotateDeg(this.rotation).multiplyScalar(this.MIN_THROTTLE).divideScalar(this.currentMass);
 		 //this.thrustAccel = this.thrust.clone().multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
@@ -263,6 +304,12 @@ var GRAVITY = new Victor(0,9.81);
      this.rocketTop = this.position.clone().addScalarX(this.width/2);
      this.rocketBottom = this.rocketTop.clone();
      this.rocketBottom.add(new Victor(0, this.height).rotateDeg(this.rotation));
+
+     //update UI variables
+     this.burnSecondsRemaining = this.fuel / this.massFlowRate;
+     this.fuelInitial = this.massInitial - this.massFinal;
+     this.fuelPercentage = this.fuel / this.fuelInitial;
+     this.fuelPercentage = clamp(this.fuelPercentage, 0.0, 1.0);
 
 
 		 if(this.autopilot) this.runAI();
@@ -323,12 +370,15 @@ var GRAVITY = new Victor(0,9.81);
 
 	 throttleOn : function(dt){
      //debugger;
-		 if(this.isThrottle!=true) {
-       this.isThrottle=true;
-       app.audioHandler.playLoop(app.audioHandler.Sounds.ENGINE, 6);
-       //app.audioHandler.playSound(app.audioHandler.Sounds.ENGINE);
+     if(this.fuel > 0) {
+       if(this.isThrottle!=true) {
+         this.isThrottle=true;
+         app.audioHandler.playLoop(app.audioHandler.Sounds.ENGINE, 6);
+         //app.audioHandler.playSound(app.audioHandler.Sounds.ENGINE);
+       }
+  		 if(this.debug) console.log("Throttle On called");
      }
-		 if(this.debug) console.log("Throttle On called");
+
 	 },
 
 	 throttleOff : function(dt){
@@ -354,8 +404,20 @@ var GRAVITY = new Victor(0,9.81);
 		 //positional settings
 		 rocket.position = new Victor(Draw.canvas.width/2,Draw.canvas.height/8);
 		 rocket.velocity = new Victor(0,0);
-		 rocket.centerOfMass = rocket.height /3 *2;
+     rocket.fuel = rocket.massInitial - rocket.massFinal;
+     rocket.currentMass = rocket.massInitial;
+     rocket.centerOfMass = rocket.height /3 *2;
 
+     //positionl vetors
+     rocket.rocketTop = rocket.position.clone().addScalarX(rocket.width/2);
+     rocket.rocketBottom = rocket.rocketTop.clone();
+     rocket.rocketBottom.add(new Victor(0, rocket.height));
+     rocket.rocketBottom.rotateDeg(rocket.rotation);
+
+     //convenience variables ( for UI)
+     rocket.burnSecondsRemaining = rocket.fuel / rocket.massFlowRate;
+     rocket.fuelInitial = rocket.massInitial - rocket.massFinal;
+     rocket.fuelPercentage = rocket.fuel / rocket.fuelInitial;
 
 
 		//moment of inertia

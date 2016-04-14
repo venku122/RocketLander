@@ -72,7 +72,7 @@ var app = app || {};
 		this.WIDTH = Draw.canvas.width;
 		this.HEIGHT = Draw.canvas.height;
 		this.ctx = this.canvas.getContext('2d');
-		
+
 		this.uicanvas = document.getElementById('uiCanvas');
 		this.uictx = this.uicanvas.getContext('2d');
 
@@ -87,7 +87,8 @@ var app = app || {};
 		//this.grd = "skyblue";
 
 		app.rocket.Emitter = app.Emitter;
-		
+
+
 		//Set up external buttons
 		var pauseButton = document.getElementById("pauseResumeButton");
 		pauseButton.onclick = function(e){
@@ -98,8 +99,8 @@ var app = app || {};
 				app.main.PAUSED = true;
 				e.target.textContent = "Un-Pause"
 			}
-			
 		}
+
 		this.update();
 	},
 
@@ -341,12 +342,6 @@ var app = app || {};
 				break;
 
 			case this.GAME_STATE.DEFAULT:
-				this.ctx.font=" 20px monospace";
-				this.ctx.textAlign = "center";
-
-				/*this.grd = this.ctx.createLinearGradient(135,206,250, this.HEIGHT),
-				this.grd.addColorStop(1, "skyblue"),
-				this.grd.addColorStop(0, "white"),*/
 				if(this.debug){
 					this.ctx.font=" 20px monospace";
 					this.ctx.textAlign = "center";
@@ -461,7 +456,7 @@ var app = app || {};
 
 		this.ctx.restore();
 	},
-	
+
 	drawSupportUI: function() {
 		this.uictx.clearRect(0,0,this.uicanvas.width, this.uicanvas.height);
 		this.uictx.textAlign = "center";
@@ -508,7 +503,7 @@ var app = app || {};
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("Landing Speed?", this.landingIndicator.X - 50, this.landingIndicator.Y  + 3);
 			this.uictx.restore();
-			
+
 			// Hull indicator, turns red when crashing
 			this.uictx.beginPath();
 			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 40, this.landingIndicator.radius, 0, 2 * Math.PI);
@@ -524,7 +519,7 @@ var app = app || {};
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("Hull:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 43);
 			this.uictx.restore();
-			
+
 			// Running:
 			this.uictx.beginPath();
 			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 60, this.landingIndicator.radius, 0, 2 * Math.PI);
@@ -540,7 +535,7 @@ var app = app || {};
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("Running:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 63);
 			this.uictx.restore();
-			
+
 			// Thrusters:
 			this.uictx.beginPath();
 			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 80, this.landingIndicator.radius, 0, 2 * Math.PI);
@@ -556,7 +551,7 @@ var app = app || {};
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("Thrusters On?", this.landingIndicator.X - 50, this.landingIndicator.Y  + 83);
 			this.uictx.restore();
-			
+
 			// Autopilot:
 			this.uictx.beginPath();
 			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 100, this.landingIndicator.radius, 0, 2 * Math.PI);
@@ -589,7 +584,6 @@ var app = app || {};
 			this.uictx.fillText("In Radar:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 123);
 			this.uictx.restore();
 			
-			
 			//-------------------------------------------------------------------
 			//Fuel Indicator ----------------------------------------------------
 			//Create a gradient that will map the ammount of fuel to how much has been used
@@ -603,41 +597,41 @@ var app = app || {};
 			if(fuelPercentage < 0) {
 				fuelPercentage = 0;
 			}
-			
+
 			this.uictx.beginPath();
-			this.uictx.moveTo(this.fuelIndicator.X , 
+			this.uictx.moveTo(this.fuelIndicator.X ,
 							this.fuelIndicator.Y );
-			var targetRadian = map_range(fuelPercentage, 
-											0, this.fuelIndicator.fuelBound, 
+			var targetRadian = map_range(fuelPercentage,
+											0, this.fuelIndicator.fuelBound,
 											0, Math.PI);
 			var dialX = this.fuelIndicator.X - this.fuelIndicator.radius * Math.cos(targetRadian);
 			var dialY = this.fuelIndicator.Y - this.fuelIndicator.radius * Math.sin(targetRadian);
 			this.uictx.lineTo(dialX, dialY);
 			this.uictx.strokeStyle = "black";
 			this.uictx.stroke();
-			
+
 			this.uictx.beginPath();
-			this.uictx.moveTo(this.fuelIndicator.X , 
+			this.uictx.moveTo(this.fuelIndicator.X ,
 							this.fuelIndicator.Y );
-			targetRadian = map_range(.1, 
-										0, this.fuelIndicator.fuelBound, 
+			targetRadian = map_range(.1,
+										0, this.fuelIndicator.fuelBound,
 										0, Math.PI);
 			dialX = this.fuelIndicator.X - this.fuelIndicator.radius * Math.cos(targetRadian);
 			dialY = this.fuelIndicator.Y - this.fuelIndicator.radius * Math.sin(targetRadian);
 			this.uictx.lineTo(dialX, dialY);
 			this.uictx.strokeStyle = "red";
 			this.uictx.stroke();
-			
+
 			this.uictx.beginPath();
 			this.uictx.arc(this.fuelIndicator.X, this.fuelIndicator.Y, this.fuelIndicator.radius, Math.PI, 2*Math.PI);
 			this.uictx.closePath();
 			this.uictx.strokeStyle = "black";
 			this.uictx.stroke();
-			
+
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("" + Math.round(fuelPercentage * 100), this.fuelIndicator.X, this.fuelIndicator.Y - this.fuelIndicator.radius / 2);
 			this.uictx.fillText("Fuel", this.fuelIndicator.X, this.fuelIndicator.Y + 20);
-			
+
 			//Draw ship status for fuel indicator
 			this.uictx.beginPath();
 			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 20, this.landingIndicator.radius, 0, 2 * Math.PI);
@@ -653,7 +647,7 @@ var app = app || {};
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("Fuel:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 23);
 			this.uictx.restore();
-			
+
 			//-----------------------------------------------------------------------
 			//Velocity Indicator ----------------------------------------------------
 			//Draw a semi circle
@@ -665,12 +659,12 @@ var app = app || {};
 				radius: 100,
 				speedBound: 100
 			}
-			
+
 			this.uictx.beginPath();
-			this.uictx.moveTo(this.velocityIndicator.X , 
+			this.uictx.moveTo(this.velocityIndicator.X ,
 							this.velocityIndicator.Y );
-			var targetRadian = map_range(app.rocket.velocity.length(), 
-											0, this.velocityIndicator.speedBound, 
+			var targetRadian = map_range(app.rocket.velocity.length(),
+											0, this.velocityIndicator.speedBound,
 											0, Math.PI);
 			targetRadian = clamp(targetRadian, 0, Math.PI);
 			var dialX = this.velocityIndicator.X - this.velocityIndicator.radius * Math.cos(targetRadian);
@@ -678,38 +672,38 @@ var app = app || {};
 			this.uictx.lineTo(dialX, dialY);
 			this.uictx.strokeStyle = "black";
 			this.uictx.stroke();
-			
+
 			this.uictx.beginPath();
-			this.uictx.moveTo(this.velocityIndicator.X , 
+			this.uictx.moveTo(this.velocityIndicator.X ,
 							this.velocityIndicator.Y );
-			targetRadian = map_range(this.maxLandingVelocity, 
-											0, this.velocityIndicator.speedBound, 
+			targetRadian = map_range(this.maxLandingVelocity,
+											0, this.velocityIndicator.speedBound,
 											0, Math.PI);
 			dialX = this.velocityIndicator.X - this.velocityIndicator.radius * Math.cos(targetRadian);
 			dialY = this.velocityIndicator.Y - this.velocityIndicator.radius * Math.sin(targetRadian);
 			this.uictx.lineTo(dialX, dialY);
 			this.uictx.strokeStyle = "yellow";
 			this.uictx.stroke();
-			
+
 			this.uictx.beginPath();
 			this.uictx.arc(this.velocityIndicator.X, this.velocityIndicator.Y, this.velocityIndicator.radius, Math.PI, 2*Math.PI);
 			this.uictx.closePath();
 			this.uictx.strokeStyle = "black";
 			this.uictx.stroke();
-			
+
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("" + Math.round(app.rocket.velocity.length()), this.velocityIndicator.X, this.velocityIndicator.Y - this.velocityIndicator.radius / 2);
 			this.uictx.fillText("Speed", this.velocityIndicator.X, this.velocityIndicator.Y + 20);
 			//-------------------------------------------------------------------
-			
+
 			this.uictx.restore();
-			
+
 			break;
-			
+
 			default:
 			break;
 		}
-		
+
 	},
 
 	drawButtons: function() {
@@ -725,18 +719,18 @@ var app = app || {};
 
 	doMouseDown: function(e) {
 		var mouse = getMouse(e);
-		
+
 		switch(this.state) {
 			case this.GAME_STATE.START:
-			if(withinRectangle(mouse.x, mouse.y, 
-							this.BUTTON_GRAPHICS.SEA_X, this.BUTTON_GRAPHICS.SEA_Y, 
+			if(withinRectangle(mouse.x, mouse.y,
+							this.BUTTON_GRAPHICS.SEA_X, this.BUTTON_GRAPHICS.SEA_Y,
 							this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height)) {
 				this.state = this.GAME_STATE.DEFAULT;
 				this.mode = this.GAME_MODE.SEA;
 				this.generatePeaks(this.HEIGHT - 100);
 			}
-			else if(withinRectangle(mouse.x, mouse.y, 
-							this.BUTTON_GRAPHICS.MOUNTAIN_X, this.BUTTON_GRAPHICS.MOUNTAIN_Y, 
+			else if(withinRectangle(mouse.x, mouse.y,
+							this.BUTTON_GRAPHICS.MOUNTAIN_X, this.BUTTON_GRAPHICS.MOUNTAIN_Y,
 							this.BUTTON_GRAPHICS.MOUNTAIN.width, this.BUTTON_GRAPHICS.MOUNTAIN.height)) {
 				this.state = this.GAME_STATE.DEFAULT;
 				this.mode = this.GAME_MODE.MOUNTAIN;
@@ -744,7 +738,7 @@ var app = app || {};
 			}
 			break;
 		}
-		
+
 	},
 
  }
