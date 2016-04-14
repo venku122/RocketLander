@@ -17,13 +17,17 @@ var GRAVITY = new Victor(0,9.81);
 	 width: 3.66,
 	 height: 41.2,
 	 rotation: 0,
-	 massInitial: 409.5,
+//	 massInitial: 409.5,
+   massInitial: 50.0,
 	 massFinal: 22.2,
 	 currentMass: 22.2,
 	 centerOfMass: this.height/3 * 2,
+   fuel: -1,
 	 //moment of inertia
 	 //I of Rod(Center) = (mass*Length^2)/12
 	 momentOfInertia: undefined,
+   rocketTop: undefined,
+   rocketBottom: undefined,
 
 
 	 //engine state
@@ -33,6 +37,7 @@ var GRAVITY = new Victor(0,9.81);
 	 throttle: 1.0,
 	 MIN_THROTTLE: .55,
 	 MAX_THROTTLE: 1.0,
+   massFlowRate: .2736,
 	 isThrottle: false,
 	 GIMBAL_RANGE: 10,
 	 GIMBAL_RESPONSE: 7,
@@ -83,7 +88,15 @@ var GRAVITY = new Victor(0,9.81);
 		 //positional settings
 		 rocket.position = new Victor(Draw.canvas.width/2,Draw.canvas.height/8);
 		 rocket.velocity = new Victor(0,0);
+     rocket.fuel = rocket.massInitial - rocket.massFinal;
+     rocket.currentMass = rocket.massInitial;
 		 rocket.centerOfMass = rocket.height /3 *2;
+
+     //positionl vetors
+     rocket.rocketTop = rocket.position.clone().addScalarX(rocket.width/2);
+     rocket.rocketBottom = rocket.rocketTop.clone();
+     rocket.rocketBottom.add(new Victor(0, rocket.height));
+     rocket.rocketBottom.rotateDeg(rocket.rotation);
 
 		//moment of inertia
 		//I of Rod(Center) = (mass*Length^2)/12
@@ -105,6 +118,12 @@ var GRAVITY = new Victor(0,9.81);
 
 
 		 if(this.debug){
+
+      ctx.fillStyle="yellow";
+       ctx.fillRect(this.rocketTop.x, this.rocketTop.y, 5,5);
+       ctx.fillStyle="red";
+       ctx.fillRect(this.rocketBottom.x, this.rocketBottom.y, 5,5);
+
 			 ctx.save();
 			 ctx.translate(this.position.x + this.width/2, this.position.y);
 
@@ -226,7 +245,9 @@ var GRAVITY = new Victor(0,9.81);
 
 		 //calculate thrust force
 		 if(this.isThrottle){
-		 this.thrustAccel = this.thrust.clone().rotateDeg(this.rotation).multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
+       this.fuel-= (this.massFlowRate * dt * this.throttle);
+       this.currentMass = this.massFinal + this.fuel;
+		 this.thrustAccel = this.thrust.clone().rotateDeg(this.rotation).multiplyScalar(this.MIN_THROTTLE).divideScalar(this.currentMass);
 		 //this.thrustAccel = this.thrust.clone().multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
 		//multiplyScalar(Math.sin(this.currentGimbal * Math.PI /180))
 		 this.acceleration.add(this.thrustAccel);
@@ -237,6 +258,12 @@ var GRAVITY = new Victor(0,9.81);
 
 		 //update position
 		 this.position.add(this.velocity.clone().multiplyScalar(dt));
+
+     //update positional vectors
+     this.rocketTop = this.position.clone().addScalarX(this.width/2);
+     this.rocketBottom = this.rocketTop.clone();
+     this.rocketBottom.add(new Victor(0, this.height).rotateDeg(this.rotation));
+
 
 		 if(this.autopilot) this.runAI();
 
@@ -329,6 +356,8 @@ var GRAVITY = new Victor(0,9.81);
 		 rocket.position = new Victor(Draw.canvas.width/2,Draw.canvas.height/8);
 		 rocket.velocity = new Victor(0,0);
 		 rocket.centerOfMass = rocket.height /3 *2;
+
+
 
 		//moment of inertia
 		//I of Rod(Center) = (mass*Length^2)/12
