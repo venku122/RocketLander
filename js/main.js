@@ -366,7 +366,6 @@ var app = app || {};
 			if(rocket.velocity.length() >= this.maxLandingVelocity){
 				return false;
 			}
-      debugger;
       this.score = (this.closeBonus / (rocket.position.x - this.target.x) ) //points for getting close to the center
       + (rocket.fuel * this.fuelBonus) //points for having fuel remaining
        - (rocket.velocity.y * this.speedBonus); //points taken away for landing fast
@@ -824,7 +823,6 @@ var app = app || {};
 	doMouseDown: function(e) {
 		var mouse = getMouse(e);
     this.ctx.font = "35px 'Press Start 2P'";
-    debugger;
 		switch(this.state) {
 			case this.GAME_STATE.START:
 			if(withinRectangle(mouse.x, mouse.y,
