@@ -131,7 +131,7 @@ var app = app || {};
       app.rocket.drawSplash(this.ctx, dt);
       this.drawUI();
       this.timer+= dt;
-      if(this.timer>= 5) this.state = this.GAME_STATE.START;
+      if(this.timer>= 5 || myKeys.keydown[myKeys.KEYBOARD.KEY_ENTER]) this.state = this.GAME_STATE.START;
       break;
 
 			case this.GAME_STATE.START:
@@ -327,7 +327,9 @@ var app = app || {};
 				this.ctx.font=" 40px monospace";
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
-				this.ctx.fillText("Press M for Mountain or S for sea", this.WIDTH/2,this.HEIGHT/2 )
+				//this.ctx.fillText("Press M for Mars or S for sea", this.WIDTH/2,this.HEIGHT/2 )
+        this.ctx.fillText("Ocean", 85, this.HEIGHT-175);
+        this.ctx.fillText("Mars", 85 + 250, this.HEIGHT-175);
 				this.drawButtons();
 				break;
 

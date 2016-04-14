@@ -339,10 +339,12 @@ var GRAVITY = new Victor(0,9.81);
 	 },
 
    drawSplash: function(ctx, dt) {
+     var shakeX = (Math.random() * 2) - 2;
+     var shakeY = (Math.random() * 2) - 2;
      ctx.save();
-     ctx.translate(app.main.WIDTH-100, app.main.HEIGHT/4);
+     ctx.translate(app.main.WIDTH-100 * shakeX * dt, app.main.HEIGHT/4 * shakeY*dt);
      ctx.rotate(45 * (Math.PI / 180));
-     ctx.scale(0.5, 0.5);
+     ctx.scale(0.4, 0.4);
      ctx.drawImage(app.rocket.ROCKET_SPRITE.STOWED,0,0,app.rocket.ROCKET_SPRITE.STOWED.width,app.rocket.ROCKET_SPRITE.STOWED.height);
 
      ctx.save();
