@@ -18,7 +18,7 @@ var GRAVITY = new Victor(0,9.81);
 	 height: 41.2,
 	 rotation: 0,
 //	 massInitial: 409.5,
-   massInitial: 50.0,
+   massInitial: 25.0,
 	 massFinal: 22.2,
 	 currentMass: 22.2,
 	 centerOfMass: this.height/3 * 2,
@@ -322,21 +322,20 @@ var GRAVITY = new Victor(0,9.81);
 	 },
 
 	 throttleOn : function(dt){
+     //debugger;
 		 if(this.isThrottle!=true) {
        this.isThrottle=true;
-       app.audioHandler.playLoop(app.audioHandler.SOUNDS.ENGINE, 6);
+       app.audioHandler.playLoop(app.audioHandler.Sounds.ENGINE, 6);
+       //app.audioHandler.playSound(app.audioHandler.Sounds.ENGINE);
      }
-
-
 		 if(this.debug) console.log("Throttle On called");
 	 },
 
 	 throttleOff : function(dt){
 		 if(this.isThrottle!=false) {
        this.isThrottle=false;
-       app.audioHandler.stopSound(app.audioHandler.SOUNDS.ENGINE);
+       app.audioHandler.stopSound(app.audioHandler.Sounds.ENGINE);
      }
-
 		 if(this.debug) console.log("Throttle Off called");
 	 },
 
