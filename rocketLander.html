@@ -11,7 +11,7 @@ border: solid 1px black;
 </style>
 </head>
 
-<body style="background-color: gray;">
+<body style="background-color: gray;font-family: Monaco, monospace; font-size:20px">
 <canvas id='mainCanvas' style="display:none;">
 Get a real browser
 </canvas>
@@ -20,9 +20,121 @@ Get a real browser
 			<canvas id='gl' >></canvas>
 		</div>
 		<div style="display:inline-block; position:fixed;">
-			<canvas id='uiCanvas' width=512 height=300 style="background-color: gray;"></canvas>
+			<canvas id='uiCanvas' width=512 height=300 style="background-color: gray; border:0px none black;"></canvas>
 			<div>
-				<button id='pauseResumeButton'>Pause</button>
+				<div>
+				Choose if conditional:
+				</br>if
+				<select id="leftHand">
+					<option value="XP"> X Position</option>
+					<option value="YP"> Y Position</option>
+					<option value="XV"> X Velocity</option>
+					<option value="YV"> Y Velocity</option>
+					<option value="SP">Speed</option>
+					<option value="RO">Rotation</option>
+					<option value="DX">Destination X</option>
+					<option value="DY">Destination Y</option>
+					<option value="LS">Landing Speed</option>
+					<option value="FL">Fuel</option>
+					<option value="0">0</option>
+					<option value="1">1</option>
+					<option value="5">5</option>
+					<option value="10">10</option>
+					<option value="45">45</option>
+					<option value="90">90</option>
+					<option value="-1">-1</option>
+					<option value="-5">-5</option>
+					<option value="-10">-10</option>
+					<option value="-45">-45</option>
+					<option value=".1">.1</option>
+					<option value=".2">.2</option>
+					<option value=".5">.4</option>
+					<option value=".7">.7</option>
+					<option value=".9">.9</option>
+				</select>
+				<select id="operator">
+					<option value="=="> ==	</option>
+					<option value="!="> !=	</option>
+					<option value=">"> >	</option>
+					<option value=">="> >=	</option>
+					<option value="<"> <	</option>
+					<option value="<="> <=	</option>
+				</select>
+				<select id="rightHand">
+					<option value="XP"> X Position</option>
+					<option value="YP"> Y Position</option>
+					<option value="XV"> X Velocity</option>
+					<option value="YV"> Y Velocity</option>
+					<option value="SP">Speed</option>
+					<option value="RO">Rotation</option>
+					<option value="DX">Destination X</option>
+					<option value="DY">Destination Y</option>
+					<option value="LS">Landing Speed</option>
+					<option value="FL">Fuel</option>
+					<option value="0">0</option>
+					<option value="1">1</option>
+					<option value="5">5</option>
+					<option value="10">10</option>
+					<option value="45">45</option>
+					<option value="90">90</option>
+					<option value="-1">-1</option>
+					<option value="-5">-5</option>
+					<option value="-10">-10</option>
+					<option value="-45">-45</option>
+					<option value="-90">-90</option>
+					<option value=".1">.1</option>
+					<option value=".2">.2</option>
+					<option value=".5">.4</option>
+					<option value=".7">.7</option>
+					<option value=".9">.9</option>
+				</select> 
+				<br/>
+				then
+				<select id="effect">
+					<option value="TH"> Thrust</option>
+					<option value="RC"> Rotate Clockwise</option>
+					<option value="UC"> Rotate Counter-clockwise</option>
+					<option value="RR"> Remove Rotation</option>
+					<option value="NO"> Do Nothing</option>
+				</select> 
+				<br/>
+				Enable Command Node:
+				<select id="enableNode">
+					<option value="NO"> None</option>
+					<option value="N1"> Node1</option>
+					<option value="N2"> Node2</option>
+					<option value="N3"> Node3</option>
+					<option value="N4"> Node4</option>
+					<option value="N5"> Node5</option>
+					<option value="N6"> Node6</option>
+					<option value="N7"> Node7</option>
+					<option value="N8"> Node8</option>
+					<option value="N9"> Node9</option>
+					<option value="N10"> Node10</option>
+				</select> 
+				<br/>
+				Disable Command Node:
+				<select id="disableNode">
+					<option value="NO"> None</option>
+					<option value="N1"> Node1</option>
+					<option value="N2"> Node2</option>
+					<option value="N3"> Node3</option>
+					<option value="N4"> Node4</option>
+					<option value="N5"> Node5</option>
+					<option value="N6"> Node6</option>
+					<option value="N7"> Node7</option>
+					<option value="N8"> Node8</option>
+					<option value="N9"> Node9</option>
+					<option value="N10"> Node10</option>
+				</select> 
+				<br/>
+					<input type="checkbox" id="enableCheckBox" name="enabledAtStart" value="EAS" checked>Enabled at start?
+				</div>
+				<button id='addCommandNode'>Add Conditional Command Node</button>
+				<div>
+					<button id='pauseResumeButton'>Pause</button>
+				</div>
+				
 			</div>
 		</div>
 	</div>

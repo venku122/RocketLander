@@ -68,7 +68,6 @@ app.audioHandler = {
         sound.nodes.push(source);
       }
 
-        debugger;
         if(duration<=0) {
           for(var i = 0; i < sound.nodes.length; i++) {
             sound.nodes[i].start(0, startTime);

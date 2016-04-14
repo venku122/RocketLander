@@ -86,20 +86,6 @@ var app = app || {};
 		this.grd.addColorStop(0, "white"),
 		//this.grd = "skyblue";
 
-		app.rocket.aiFunctions.push(function(){
-			if(app.rocket.position.y < app.main.target.y && app.rocket.velocity.y > 10) {
-				app.rocket.throttleOn(app.main.calculateDeltaTime());
-			} else {
-				app.rocket.throttleOff(app.main.calculateDeltaTime());
-			}
-		});
-		app.rocket.aiFunctions.push(function(){
-			if(app.rocket.position.x < app.main.target.x && app.rocket.rotation < Math.PI / 4) {
-				app.rocket.changeGimbal(-.5, app.main.calculateDeltaTime());
-			} else if(app.rocket.position.x > app.main.target.x && app.rocket.rotation < Math.PI / 4){
-				app.rocket.changeGimbal(.5, app.main.calculateDeltaTime());
-			}
-		});
 		app.rocket.Emitter = app.Emitter;
 		
 		//Set up external buttons
@@ -488,10 +474,10 @@ var app = app || {};
 			this.statusBox = {
 				X: 400,
 				Y: 0,
-				height: 150
+				height: 170
 			}
 			this.uictx.strokeStyle = "black";
-			this.uictx.strokeRect(this.statusBox.X, this.statusBox.Y, 200, this.statusBox.height);
+			this.uictx.strokeRect(this.statusBox.X, this.statusBox.Y, 112, this.statusBox.height);
 			this.uictx.save();
 			this.uictx.font=" 18px monospace";
 			this.uictx.fillStyle = "white";
@@ -587,6 +573,22 @@ var app = app || {};
 			this.uictx.fillText("Autopilot:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 103);
 			this.uictx.restore();
 			
+			// Offradar:
+			this.uictx.beginPath();
+			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 120, this.landingIndicator.radius, 0, 2 * Math.PI);
+			if(app.rocket.position.x < 0 || app.rocket.position.x > this.WIDTH ){
+				this.uictx.fillStyle = "red";
+			}
+			else{
+				this.uictx.fillStyle = "green";
+			}
+			this.uictx.fill();
+			this.uictx.save();
+			this.uictx.font=" 11px monospace";
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("In Radar:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 123);
+			this.uictx.restore();
+			
 			
 			//-------------------------------------------------------------------
 			//Fuel Indicator ----------------------------------------------------
@@ -597,7 +599,7 @@ var app = app || {};
 				radius: 100,
 				fuelBound: 1,
 			}
-			var fuelPercentage = app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal)
+			var fuelPercentage = app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal);
 			if(fuelPercentage < 0) {
 				fuelPercentage = 0;
 			}
@@ -745,6 +747,157 @@ var app = app || {};
 		
 	},
 
+ }
+ 
+ /*
+ app.rocket.aiFunctions.push(function(){
+	if(app.rocket.position.y < app.main.target.y && app.rocket.velocity.y > 10) {
+		app.rocket.throttleOn(app.main.calculateDeltaTime());
+	} else {
+		app.rocket.throttleOff(app.main.calculateDeltaTime());
+	}
+});
+app.rocket.aiFunctions.push(function(){
+	if(app.rocket.position.x < app.main.target.x && app.rocket.rotation < Math.PI / 4) {
+		app.rocket.changeGimbal(-.5, app.main.calculateDeltaTime());
+	} else if(app.rocket.position.x > app.main.target.x && app.rocket.rotation < Math.PI / 4){
+		app.rocket.changeGimbal(.5, app.main.calculateDeltaTime());
+	}
+});*/
+ app.inputHandler = {
+	 leftHand: undefined,
+	 rightHand: undefined,
+	 operator: undefined,
+	 checkBox: undefined,
+	 effect: undefined,
+	 enableNode: undefined,
+	 disableNode: undefined,
+	 addCommandButton: undefined,
+	 
+	 init: function() {
+		 this.leftHand = document.getElementById('leftHand');
+		 this.rightHand = document.getElementById('rightHand');
+		 this.operator = document.getElementById('operator');
+		 this.effect = document.getElementById('effect');
+		 this.enableNode = document.getElementById('enableNode');
+		 this.disableNode = document.getElementById('disableNode');
+		 this.checkBox = document.getElementById('enableCheckBox');
+		 this.addCommandButton = document.getElementById('addCommandNode');
+		 
+		 this.addCommandButton.onclick = this.processInputs;
+	 },
+	 
+	 processInputs: function(){
+		 var leftHandValue = app.inputHandler.handleOperands(app.inputHandler.leftHand.value);
+		 var rightHandValue = app.inputHandler.handleOperands(app.inputHandler.rightHand.value);
+		 
+		 switch(app.inputHandler.operator) {
+			 case"==":
+			 
+			 break;
+			 case"!=":
+			 
+			 break;
+			 case">" :
+			 
+			 break;
+			 case">=":
+			 
+			 break;
+			 case"<" :
+			 
+			 break;
+			 case"<=":
+			 
+			 break;
+			 default:
+			 break;
+		 }
+		 
+	 },
+	 
+	 handleOperands: function(value){
+		 switch(value) {
+			case "XP" :
+			return app.rocket.position.x;
+			break;
+			case "YP" :
+			return app.rocket.position.y;
+			break;
+			case "XV" :
+			return app.rocket.velocity.x;
+			break;
+			case "YV" :
+			return app.rocket.velocity.V;
+			break;
+			case "SP" :
+			return app.rocket.velocity.length();
+			break;
+			case "RO" :
+			return app.rocket.rotation
+			break;
+			case "DX" :
+			return app.main.target.x;
+			break;
+			case "DY" :
+			return app.main.target.y;
+			break;
+			case "LS" :
+			return app.main.maxLandingVelocity;
+			break;
+			case "FL" :
+			return app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal)
+			break;
+			case "0"  :
+			return 0;
+			break;
+			case "1"  :
+			return 1;
+			break;
+			case "5"  :
+			return 5;
+			break;
+			case "10" :
+			return 10;
+			break;
+			case "45" :
+			return 45;
+			break;
+			case "90" :
+			return 90;
+			break;
+			case "-1" :
+			return -1;
+			break;
+			case "-5" :
+			return -5;
+			break;
+			case "-10":
+			return -10;
+			break;
+			case "-45":
+			return -45;
+			break;
+			case ".1" :
+			return .1;
+			break;
+			case ".2" :
+			return .2;
+			break;
+			case ".5" :
+			return .5;
+			break;
+			case ".7" :
+			return .7;
+			break;
+			case ".9" :
+			return .9;
+			break;
+			default:
+			return 0;
+		 }
+	 }
+	 
  }
 
  /*

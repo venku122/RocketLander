@@ -28,6 +28,7 @@ window.onload = function(){
 	app.main.init();
 	loadImages(sources, app.rocket.init);
 	loadImages(buttonSources, app.main.imageLoader);
+	app.inputHandler.init();
 
 	canvas.onmousedown = app.main.doMouseDown.bind(app.main);
 
