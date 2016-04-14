@@ -95,7 +95,7 @@ var app = app || {};
 			}
 		});
 		app.rocket.Emitter = app.Emitter;
-    
+
 		this.update();
 	},
 
@@ -371,16 +371,16 @@ var app = app || {};
 					height:	200,
 					fuelGradient: null
 				}
-				var fuelPercentage = app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal)
+				//var fuelPercentage = app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal)
 
-				if(fuelPercentage > 0.2) {
+				if(app.rocket.fuelPercentage > 0.2) {
 					this.fuelIndicator.fuelGradient =
 						this.ctx.createLinearGradient(this.fuelIndicator.X, this.fuelIndicator.Y,
 																this.fuelIndicator.X,
 																this.fuelIndicator.Y + this.fuelIndicator.height);
 					this.fuelIndicator.fuelGradient.addColorStop(1, "red");
 					this.fuelIndicator.fuelGradient.addColorStop(.8, "green");
-					this.fuelIndicator.fuelGradient.addColorStop(1 - fuelPercentage, "white");
+					this.fuelIndicator.fuelGradient.addColorStop(1 - app.rocket.fuelPercentage, "white");
 				}
 				else
 				{
@@ -389,7 +389,7 @@ var app = app || {};
 														this.fuelIndicator.X,
 														this.fuelIndicator.Y + this.fuelIndicator.height);
 					this.fuelIndicator.fuelGradient.addColorStop(1, "red");
-					this.fuelIndicator.fuelGradient.addColorStop(1 - fuelPercentage, "white");
+					this.fuelIndicator.fuelGradient.addColorStop(1 - app.rocket.fuelPercentage, "white");
 				}
 
 				this.ctx.fillStyle = this.fuelIndicator.fuelGradient;

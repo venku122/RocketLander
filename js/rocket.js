@@ -54,14 +54,21 @@ var GRAVITY = new Victor(0,9.81);
 	 SCALE_FACTOR: 10,
 	 Emitter: undefined, // required - loaded by loader.js
 	 exhaust: undefined,
+
 	 //graphics
 	 ROCKET_SPRITE: {
 		 DEPLOYED: new Image(),
 		 STOWED: new Image()
 	 },
+
 	 //autopilot
 	 autopilot: false,
 	 aiFunctions: [],
+
+   //convenience variables
+   burnSecondsRemaining: -1,
+   fuelPercentage: 1.0,
+   fuelInitial: -1,
 
 
 
@@ -77,8 +84,6 @@ var GRAVITY = new Victor(0,9.81);
 
 		 rocket.ROCKET_SPRITE.STOWED.crossOrigin = "anonymous";
 		 rocket.ROCKET_SPRITE.DEPLOYED.crossOrigin = "anonymous";
-
-
 
 		 // width/height with respect to images
 		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width / rocket.SCALE_FACTOR;
@@ -98,13 +103,20 @@ var GRAVITY = new Victor(0,9.81);
      rocket.rocketBottom.add(new Victor(0, rocket.height));
      rocket.rocketBottom.rotateDeg(rocket.rotation);
 
+     //convenience variables ( for UI)
+     rocket.burnSecondsRemaining = rocket.fuel / rocket.massFlowRate;
+     rocket.fuelInitial = rocket.massInitial - rocket.massFinal;
+     rocket.fuelPercentage = rocket.fuel / rocket.fuelInitial;
+
+
 		//moment of inertia
 		//I of Rod(Center) = (mass*Length^2)/12
-
 		 rocket.momentOfInertia = (rocket.currentMass * rocket.centerOfMass * rocket.centerOfMass)/12;
 
+     //AI initialization
 		 rocket.aiFunctions = new Array();
 
+     //exhaust particle effects
 		 rocket.exhaust = new rocket.Emitter();
 		 rocket.exhaust.numParticles =100;
 		 rocket.exhaust.red=255;
@@ -264,6 +276,12 @@ var GRAVITY = new Victor(0,9.81);
      this.rocketBottom = this.rocketTop.clone();
      this.rocketBottom.add(new Victor(0, this.height).rotateDeg(this.rotation));
 
+     //update UI variables
+     this.burnSecondsRemaining = this.fuel / this.massFlowRate;
+     this.fuelInitial = this.massInitial - this.massFinal;
+     this.fuelPercentage = this.fuel / this.fuelInitial;
+     this.fuelPercentage = clamp(this.fuelPercentage, 0.0, 1.0);
+
 
 		 if(this.autopilot) this.runAI();
 
@@ -354,8 +372,20 @@ var GRAVITY = new Victor(0,9.81);
 		 //positional settings
 		 rocket.position = new Victor(Draw.canvas.width/2,Draw.canvas.height/8);
 		 rocket.velocity = new Victor(0,0);
-		 rocket.centerOfMass = rocket.height /3 *2;
+     rocket.fuel = rocket.massInitial - rocket.massFinal;
+     rocket.currentMass = rocket.massInitial;
+     rocket.centerOfMass = rocket.height /3 *2;
 
+     //positionl vetors
+     rocket.rocketTop = rocket.position.clone().addScalarX(rocket.width/2);
+     rocket.rocketBottom = rocket.rocketTop.clone();
+     rocket.rocketBottom.add(new Victor(0, rocket.height));
+     rocket.rocketBottom.rotateDeg(rocket.rotation);
+
+     //convenience variables ( for UI)
+     rocket.burnSecondsRemaining = rocket.fuel / rocket.massFlowRate;
+     rocket.fuelInitial = rocket.massInitial - rocket.massFinal;
+     rocket.fuelPercentage = rocket.fuel / rocket.fuelInitial;
 
 
 		//moment of inertia
