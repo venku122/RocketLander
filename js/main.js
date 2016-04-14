@@ -36,6 +36,8 @@ var app = app || {};
 	 //Properties
 	canvas: undefined,
     ctx: undefined,
+	uicanvas: undefined,
+	uictx: undefined,
 	debug: false,
     timer: 0,
 	animationID: 0,
@@ -60,6 +62,7 @@ var app = app || {};
 		MOUNTAIN_Y: 0,
 	},
 	maxLandingVelocity: 25,
+	PAUSED: false,
 
 	init : function(){
 		if(this.debug) console.log("app.main.init() called");
@@ -69,6 +72,9 @@ var app = app || {};
 		this.WIDTH = Draw.canvas.width;
 		this.HEIGHT = Draw.canvas.height;
 		this.ctx = this.canvas.getContext('2d');
+
+		this.uicanvas = document.getElementById('uiCanvas');
+		this.uictx = this.uicanvas.getContext('2d');
 
 		this.state = this.GAME_STATE.START; //Enable while testing
 		//this.state = this.GAME_STATE.SPLASH;
@@ -95,6 +101,19 @@ var app = app || {};
 			}
 		});
 		app.rocket.Emitter = app.Emitter;
+
+
+		//Set up external buttons
+		var pauseButton = document.getElementById("pauseResumeButton");
+		pauseButton.onclick = function(e){
+			if(app.main.PAUSED) {
+				app.main.PAUSED = false;
+				e.target.textContent = "Pause"
+			} else {
+				app.main.PAUSED = true;
+				e.target.textContent = "Un-Pause"
+			}
+		}
 
 		this.update();
 	},
@@ -132,16 +151,15 @@ var app = app || {};
 
 		switch(this.state){
 
-      case this.GAME_STATE.SPLASH:
-      this.drawBG();
-      app.rocket.drawSplash(this.ctx, dt);
-      this.drawUI();
-      this.timer+= dt;
-      if(this.timer>= 5 || myKeys.keydown[myKeys.KEYBOARD.KEY_ENTER]) this.state = this.GAME_STATE.START;
-      break;
+			case this.GAME_STATE.SPLASH:
+			this.drawBG();
+			app.rocket.drawSplash(this.ctx, dt);
+			this.drawUI();
+			this.timer+= dt;
+			if(this.timer>= 5 || myKeys.keydown[myKeys.KEYBOARD.KEY_ENTER]) this.state = this.GAME_STATE.START;
+			break;
 
 			case this.GAME_STATE.START:
-
 			this.drawBG();
 			this.drawUI();
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_M]) {
@@ -160,23 +178,23 @@ var app = app || {};
 			break;
 
 			case this.GAME_STATE.DEFAULT:
+			if(this.PAUSED == false) {
+				//get deltaTime
+				//collect input
+				//change gimbal position
+				if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
+				if(!app.rocket.autopilot) if(myKeys.keydown[myKeys.KEYBOARD.KEY_D]) app.rocket.changeGimbal(15, dt);
+				if(!app.rocket.autopilot) if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
 
-			//get deltaTime
-
-			//collect input
-			//change gimbal position
-			if(myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(-15, dt);
-			if(!app.rocket.autopilot) if(myKeys.keydown[myKeys.KEYBOARD.KEY_D]) app.rocket.changeGimbal(15, dt);
-			if(!app.rocket.autopilot) if(!myKeys.keydown[myKeys.KEYBOARD.KEY_D] && !myKeys.keydown[myKeys.KEYBOARD.KEY_A]) app.rocket.changeGimbal(0, dt);
-
-			//check for throttle
-			if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
-			if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
-			// TODO: Make a different control scheme or toggle for this as it breaks AI controls
+				//check for throttle
+				if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
+				if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
+				// TODO: Make a different control scheme or toggle for this as it breaks AI controls
 
 
-			//update
-			app.rocket.update(dt);
+				//update
+				app.rocket.update(dt);
+			}
 			if(this.state == this.GAME_STATE.DEFAULT){
 				if(this.checkForCollisions(app.rocket) || this.shakeTimer != null) {
 					if( !this.didLandSafely(app.rocket) || this.shakeTimer != null){
@@ -209,6 +227,7 @@ var app = app || {};
 			this.drawUI();
 			this.drawTerrain();
 			this.drawWaypoint();
+			this.drawSupportUI();
 
 			//draw rocket
 			app.rocket.draw(this.ctx);
@@ -331,8 +350,8 @@ var app = app || {};
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
 				//this.ctx.fillText("Press M for Mars or S for sea", this.WIDTH/2,this.HEIGHT/2 )
-        this.ctx.fillText("Ocean", 85, this.HEIGHT-175);
-        this.ctx.fillText("Mars", 85 + 250, this.HEIGHT-175);
+				this.ctx.fillText("Ocean", 85, this.HEIGHT-175);
+				this.ctx.fillText("Mars", 85 + 250, this.HEIGHT-175);
 				this.drawButtons();
 				break;
 
@@ -343,6 +362,7 @@ var app = app || {};
 				/*this.grd = this.ctx.createLinearGradient(135,206,250, this.HEIGHT),
 				this.grd.addColorStop(1, "skyblue"),
 				this.grd.addColorStop(0, "white"),*/
+
 
 				//Create the UI that will represent the in game status of the ship, such as if it is okay to land
 				this.ctx.save();
@@ -558,6 +578,240 @@ var app = app || {};
 		this.ctx.restore();
 	},
 
+	drawSupportUI: function() {
+		this.uictx.clearRect(0,0,this.uicanvas.width, this.uicanvas.height);
+		this.uictx.textAlign = "center";
+		this.uictx.font=" 20px monospace";
+		switch(this.state){
+			case this.GAME_STATE.DEFAULT:
+			//Create the UI that will represent the in game status of the ship, such as if it is okay to land
+			this.uictx.save();
+			//Draw somethign to indicate ship status information
+			this.statusBox = {
+				X: 400,
+				Y: 0,
+				height: 150
+			}
+			this.uictx.strokeStyle = "black";
+			this.uictx.strokeRect(this.statusBox.X, this.statusBox.Y, 200, this.statusBox.height);
+			this.uictx.save();
+			this.uictx.font=" 18px monospace";
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("Ship status", this.statusBox.X + 57, this.statusBox.Y + 18);
+			this.uictx.beginPath();
+			this.uictx.moveTo(this.statusBox.X, this.statusBox.Y + 25);
+			this.uictx.lineTo(this.statusBox.X + 200, this.statusBox.Y + 25);
+			this.uictx.strokeStyle = "black";
+			this.uictx.stroke();
+			this.uictx.restore();
+			//Landing Indicator -------------------------------------------------
+			this.landingIndicator = {
+				X: 500,
+				Y: 40,
+				radius: 5,
+			}
+			this.uictx.beginPath();
+			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y, this.landingIndicator.radius, 0, 2 * Math.PI);
+			if(app.rocket.velocity.length() < this.maxLandingVelocity ){
+				this.uictx.fillStyle = "green";
+			}
+			else{
+				this.uictx.fillStyle = "red";
+			}
+			this.uictx.fill();
+			this.uictx.save();
+			this.uictx.font=" 11px monospace";
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("Landing Speed?", this.landingIndicator.X - 50, this.landingIndicator.Y  + 3);
+			this.uictx.restore();
+
+			// Hull indicator, turns red when crashing
+			this.uictx.beginPath();
+			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 40, this.landingIndicator.radius, 0, 2 * Math.PI);
+			if(this.shakeTimer == null ){
+				this.uictx.fillStyle = "green";
+			}
+			else{
+				this.uictx.fillStyle = "red";
+			}
+			this.uictx.fill();
+			this.uictx.save();
+			this.uictx.font=" 11px monospace";
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("Hull:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 43);
+			this.uictx.restore();
+
+			// Running:
+			this.uictx.beginPath();
+			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 60, this.landingIndicator.radius, 0, 2 * Math.PI);
+			if(this.PAUSED == false ){
+				this.uictx.fillStyle = "green";
+			}
+			else{
+				this.uictx.fillStyle = "red";
+			}
+			this.uictx.fill();
+			this.uictx.save();
+			this.uictx.font=" 11px monospace";
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("Running:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 63);
+			this.uictx.restore();
+
+			// Thrusters:
+			this.uictx.beginPath();
+			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 80, this.landingIndicator.radius, 0, 2 * Math.PI);
+			if(app.rocket.isThrottle  ){
+				this.uictx.fillStyle = "green";
+			}
+			else{
+				this.uictx.fillStyle = "red";
+			}
+			this.uictx.fill();
+			this.uictx.save();
+			this.uictx.font=" 11px monospace";
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("Thrusters On?", this.landingIndicator.X - 50, this.landingIndicator.Y  + 83);
+			this.uictx.restore();
+
+			// Autopilot:
+			this.uictx.beginPath();
+			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 100, this.landingIndicator.radius, 0, 2 * Math.PI);
+			if(app.rocket.autopilot  ){
+				this.uictx.fillStyle = "green";
+			}
+			else{
+				this.uictx.fillStyle = "red";
+			}
+			this.uictx.fill();
+			this.uictx.save();
+			this.uictx.font=" 11px monospace";
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("Autopilot:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 103);
+			this.uictx.restore();
+
+
+			//-------------------------------------------------------------------
+			//Fuel Indicator ----------------------------------------------------
+			//Create a gradient that will map the ammount of fuel to how much has been used
+			this.fuelIndicator = {
+				X:100,
+				Y:100,
+				radius: 100,
+				fuelBound: 1,
+			}
+			var fuelPercentage = app.rocket.fuel / (app.rocket.massInitial - app.rocket.massFinal)
+			if(fuelPercentage < 0) {
+				fuelPercentage = 0;
+			}
+
+			this.uictx.beginPath();
+			this.uictx.moveTo(this.fuelIndicator.X ,
+							this.fuelIndicator.Y );
+			var targetRadian = map_range(fuelPercentage,
+											0, this.fuelIndicator.fuelBound,
+											0, Math.PI);
+			var dialX = this.fuelIndicator.X - this.fuelIndicator.radius * Math.cos(targetRadian);
+			var dialY = this.fuelIndicator.Y - this.fuelIndicator.radius * Math.sin(targetRadian);
+			this.uictx.lineTo(dialX, dialY);
+			this.uictx.strokeStyle = "black";
+			this.uictx.stroke();
+
+			this.uictx.beginPath();
+			this.uictx.moveTo(this.fuelIndicator.X ,
+							this.fuelIndicator.Y );
+			targetRadian = map_range(.1,
+										0, this.fuelIndicator.fuelBound,
+										0, Math.PI);
+			dialX = this.fuelIndicator.X - this.fuelIndicator.radius * Math.cos(targetRadian);
+			dialY = this.fuelIndicator.Y - this.fuelIndicator.radius * Math.sin(targetRadian);
+			this.uictx.lineTo(dialX, dialY);
+			this.uictx.strokeStyle = "red";
+			this.uictx.stroke();
+
+			this.uictx.beginPath();
+			this.uictx.arc(this.fuelIndicator.X, this.fuelIndicator.Y, this.fuelIndicator.radius, Math.PI, 2*Math.PI);
+			this.uictx.closePath();
+			this.uictx.strokeStyle = "black";
+			this.uictx.stroke();
+
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("" + Math.round(fuelPercentage * 100), this.fuelIndicator.X, this.fuelIndicator.Y - this.fuelIndicator.radius / 2);
+			this.uictx.fillText("Fuel", this.fuelIndicator.X, this.fuelIndicator.Y + 20);
+
+			//Draw ship status for fuel indicator
+			this.uictx.beginPath();
+			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 20, this.landingIndicator.radius, 0, 2 * Math.PI);
+			if(fuelPercentage > .1 ){
+				this.uictx.fillStyle = "green";
+			}
+			else{
+				this.uictx.fillStyle = "red";
+			}
+			this.uictx.fill();
+			this.uictx.save();
+			this.uictx.font=" 11px monospace";
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("Fuel:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 23);
+			this.uictx.restore();
+
+			//-----------------------------------------------------------------------
+			//Velocity Indicator ----------------------------------------------------
+			//Draw a semi circle
+			//draw a dial for current velocity
+			//Draw a dial for target velocity
+			this.velocityIndicator = {
+				X: 300,
+				Y: 100,
+				radius: 100,
+				speedBound: 100
+			}
+
+			this.uictx.beginPath();
+			this.uictx.moveTo(this.velocityIndicator.X ,
+							this.velocityIndicator.Y );
+			var targetRadian = map_range(app.rocket.velocity.length(),
+											0, this.velocityIndicator.speedBound,
+											0, Math.PI);
+			targetRadian = clamp(targetRadian, 0, Math.PI);
+			var dialX = this.velocityIndicator.X - this.velocityIndicator.radius * Math.cos(targetRadian);
+			var dialY = this.velocityIndicator.Y - this.velocityIndicator.radius * Math.sin(targetRadian);
+			this.uictx.lineTo(dialX, dialY);
+			this.uictx.strokeStyle = "black";
+			this.uictx.stroke();
+
+			this.uictx.beginPath();
+			this.uictx.moveTo(this.velocityIndicator.X ,
+							this.velocityIndicator.Y );
+			targetRadian = map_range(this.maxLandingVelocity,
+											0, this.velocityIndicator.speedBound,
+											0, Math.PI);
+			dialX = this.velocityIndicator.X - this.velocityIndicator.radius * Math.cos(targetRadian);
+			dialY = this.velocityIndicator.Y - this.velocityIndicator.radius * Math.sin(targetRadian);
+			this.uictx.lineTo(dialX, dialY);
+			this.uictx.strokeStyle = "yellow";
+			this.uictx.stroke();
+
+			this.uictx.beginPath();
+			this.uictx.arc(this.velocityIndicator.X, this.velocityIndicator.Y, this.velocityIndicator.radius, Math.PI, 2*Math.PI);
+			this.uictx.closePath();
+			this.uictx.strokeStyle = "black";
+			this.uictx.stroke();
+
+			this.uictx.fillStyle = "white";
+			this.uictx.fillText("" + Math.round(app.rocket.velocity.length()), this.velocityIndicator.X, this.velocityIndicator.Y - this.velocityIndicator.radius / 2);
+			this.uictx.fillText("Speed", this.velocityIndicator.X, this.velocityIndicator.Y + 20);
+			//-------------------------------------------------------------------
+
+			this.uictx.restore();
+
+			break;
+
+			default:
+			break;
+		}
+
+	},
+
 	drawButtons: function() {
 		var seaX, seaY;
 		seaX = 35;
@@ -570,28 +824,29 @@ var app = app || {};
 	},
 
 	doMouseDown: function(e) {
-			var mouse = getMouse(e);
+		var mouse = getMouse(e);
 
-			switch(this.state) {
-				case this.GAME_STATE.START:
-				if(withinRectangle(mouse.x, mouse.y,
-								this.BUTTON_GRAPHICS.SEA_X, this.BUTTON_GRAPHICS.SEA_Y,
-								this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height)) {
-					this.state = this.GAME_STATE.DEFAULT;
-					this.mode = this.GAME_MODE.SEA;
-					this.generatePeaks(this.HEIGHT - 100);
-				}
-				else if(withinRectangle(mouse.x, mouse.y,
-								this.BUTTON_GRAPHICS.MOUNTAIN_X, this.BUTTON_GRAPHICS.MOUNTAIN_Y,
-								this.BUTTON_GRAPHICS.MOUNTAIN.width, this.BUTTON_GRAPHICS.MOUNTAIN.height)) {
-					this.state = this.GAME_STATE.DEFAULT;
-					this.mode = this.GAME_MODE.MOUNTAIN;
-					this.generatePeaks(this.HEIGHT - 100);
-				}
-				break;
+		switch(this.state) {
+			case this.GAME_STATE.START:
+			if(withinRectangle(mouse.x, mouse.y,
+							this.BUTTON_GRAPHICS.SEA_X, this.BUTTON_GRAPHICS.SEA_Y,
+							this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height)) {
+				this.state = this.GAME_STATE.DEFAULT;
+				this.mode = this.GAME_MODE.SEA;
+				this.generatePeaks(this.HEIGHT - 100);
 			}
-
+			else if(withinRectangle(mouse.x, mouse.y,
+							this.BUTTON_GRAPHICS.MOUNTAIN_X, this.BUTTON_GRAPHICS.MOUNTAIN_Y,
+							this.BUTTON_GRAPHICS.MOUNTAIN.width, this.BUTTON_GRAPHICS.MOUNTAIN.height)) {
+				this.state = this.GAME_STATE.DEFAULT;
+				this.mode = this.GAME_MODE.MOUNTAIN;
+				this.generatePeaks(this.HEIGHT - 100);
+			}
+			break;
 		}
+
+	},
+
  }
 
  /*

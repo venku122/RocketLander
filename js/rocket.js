@@ -95,6 +95,10 @@ var GRAVITY = new Victor(0,9.81);
 		 rocket.velocity = new Victor(0,0);
      rocket.fuel = rocket.massInitial - rocket.massFinal;
      rocket.currentMass = rocket.massInitial;
+
+     //center of mass calcultions
+     //CoM = (m1x1 + m2x2) / m1 + m2
+     rocket.centerOfMass = (rocket.massFinal * 0) + rocket.fuel * rocket
 		 rocket.centerOfMass = rocket.height /3 *2;
 
      //positionl vetors

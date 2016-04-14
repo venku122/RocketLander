@@ -11,16 +11,19 @@ border: solid 1px black;
 </style>
 </head>
 
-<body>
+<body style="background-color: gray;">
 <canvas id='mainCanvas' style="display:none;">
 Get a real browser
 </canvas>
-	<div style="position: fixed;left:25%">
-		<canvas id='gl'></canvas>
-		<div style="float:right">
-
-
-			<button id='pauseResumeButton'>Pause</button>
+	<div style="//text-align:center;">
+		<div style="display:inline-block;">
+			<canvas id='gl' >></canvas>
+		</div>
+		<div style="display:inline-block; position:fixed;">
+			<canvas id='uiCanvas' width=512 height=300 style="background-color: gray;"></canvas>
+			<div>
+				<button id='pauseResumeButton'>Pause</button>
+			</div>
 		</div>
 	</div>
 </body>
