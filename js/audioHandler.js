@@ -87,5 +87,9 @@ app.audioHandler = {
           sound.nodes.pop();
         }
       }
+    },
+
+    muteAudio: function() {
+      this.Sounds.FLIGHT.nodes[0].stop();
     }
   }

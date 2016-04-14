@@ -116,6 +116,11 @@ var app = app || {};
 			}
 		}
 
+    var muteButton = document.getElementById("muteButton");
+		muteButton.onclick = function(e){
+			app.audioHandler.muteAudio();
+		}
+
 		this.update();
 	},
 
