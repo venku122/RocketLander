@@ -29,7 +29,7 @@ window.onload = function(){
 	loadImages(sources, app.rocket.init);
 	loadImages(buttonSources, app.main.imageLoader);
 
-
+	canvas.onmousedown = app.main.doMouseDown.bind(app.main);
 
 };
 

@@ -5,10 +5,23 @@
 // returns mouse position in local coordinate system of element
 function getMouse(e){
 	var mouse = {} // make an object
-	mouse.x = e.pageX - e.target.offsetLeft;
+	mouse.x = e.pageX - e.target.offsetLeft - 150;
 	mouse.y = e.pageY - e.target.offsetTop;
 	return mouse;
 }
+
+function withinRectangle(mouseX,mouseY,x,y,width,height){
+	if(mouseY > y && mouseY < y + height) {
+		if(mouseX > x && mouseX < x + width) {
+			return true
+		} else {
+			return false;
+		}
+	} else {
+		return false
+	}
+}
+
 
 function getRandom(min, max) {
   	return Math.random() * (max - min) + min;
