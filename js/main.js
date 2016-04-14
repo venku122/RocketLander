@@ -114,7 +114,6 @@ var app = app || {};
 			}
 			
 		}
-
 		this.update();
 	},
 
@@ -125,7 +124,7 @@ var app = app || {};
 
 		main.BUTTON_GRAPHICS.SEA.crossOrigin = "anonymous";
 		main.BUTTON_GRAPHICS.SEA.crossOrigin = "anonymous";
-		
+
 		main.BUTTON_GRAPHICS.SEA_X = 35;
 		main.BUTTON_GRAPHICS.SEA_Y = main.HEIGHT / 3 * 2;
 		main.BUTTON_GRAPHICS.MOUNTAIN_X = main.BUTTON_GRAPHICS.SEA_X + main.BUTTON_GRAPHICS.SEA.width + 50;
@@ -358,13 +357,10 @@ var app = app || {};
 			case this.GAME_STATE.DEFAULT:
 				this.ctx.font=" 20px monospace";
 				this.ctx.textAlign = "center";
-				
+
 				/*this.grd = this.ctx.createLinearGradient(135,206,250, this.HEIGHT),
 				this.grd.addColorStop(1, "skyblue"),
 				this.grd.addColorStop(0, "white"),*/
-				
-				
-				
 				if(this.debug){
 					this.ctx.font=" 20px monospace";
 					this.ctx.textAlign = "center";
@@ -724,7 +720,7 @@ var app = app || {};
 		this.ctx.drawImage(this.BUTTON_GRAPHICS.MOUNTAIN, this.BUTTON_GRAPHICS.MOUNTAIN_X, this.BUTTON_GRAPHICS.MOUNTAIN_Y, this.BUTTON_GRAPHICS.MOUNTAIN.width, this.BUTTON_GRAPHICS.MOUNTAIN.height);
 		this.ctx.strokeRect(this.BUTTON_GRAPHICS.MOUNTAIN_X, this.BUTTON_GRAPHICS.MOUNTAIN_Y, this.BUTTON_GRAPHICS.MOUNTAIN.width, this.BUTTON_GRAPHICS.MOUNTAIN.height )
 	},
-	
+
 	doMouseDown: function(e) {
 		var mouse = getMouse(e);
 		
