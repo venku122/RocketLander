@@ -18,7 +18,7 @@ var GRAVITY = new Victor(0,9.81);
 	 height: 41.2,
 	 rotation: 0,
 //	 massInitial: 409.5,
-   massInitial: 32.0,
+   massInitial: 30.0,
 	 massFinal: 25.6,
 	 currentMass: undefined,
    engineMass : undefined,
@@ -43,6 +43,7 @@ var GRAVITY = new Victor(0,9.81);
 	 MAX_THROTTLE: 1.0,
    massFlowRate: .2736,
 	 isThrottle: false,
+   isTriple: false,
 	 GIMBAL_RANGE: 10,
 	 GIMBAL_RESPONSE: 7,
 	 currentGimbal: 0,
@@ -58,6 +59,7 @@ var GRAVITY = new Victor(0,9.81);
 	 SCALE_FACTOR: 10,
 	 Emitter: undefined, // required - loaded by loader.js
 	 exhaust: undefined,
+   tripleExhaust: undefined,
 
 	 //graphics
 	 ROCKET_SPRITE: {
@@ -145,7 +147,15 @@ var GRAVITY = new Victor(0,9.81);
 		 rocket.exhaust.red=255;
 		 rocket.exhaust.green=150;
 		 rocket.exhaust.createParticles({x:0, y:0});
-		 
+
+     //triple exhaust effect
+     rocket.tripleExhaust = new rocket.Emitter();
+		 rocket.tripleExhaust.numParticles = 200;
+		 rocket.tripleExhaust.red=255;
+		 rocket.tripleExhaust.green=125;
+     rocket.tripleExhaust.blue=75;
+		 rocket.tripleExhaust.createParticles({x:0, y:0});
+
 	 },
 
 	 //draws the rocket
@@ -248,11 +258,10 @@ var GRAVITY = new Victor(0,9.81);
 			 ctx.stroke();
 
 			  //exhaust
-			this.exhaust.draw(ctx);
+	     this.exhaust.draw(ctx);
+       if(this.isTriple)  this.tripleExhaust.draw(ctx);
 			 ctx.restore();
 			 }
-
-
 		 ctx.restore();
 		 }
 
@@ -271,9 +280,14 @@ var GRAVITY = new Victor(0,9.81);
        (this.fuel * (this.fuelLevel / 2) +
        (this.tankMass * (this.height / 2))))/
        (this.massFinal + this.fuel);
-		 var torque = (this.height - this.centerOfMass)* this.thrust.clone().y * this.currentGimbal;
-		 //acceleration = torque force / Moment of Inertia
-		 var angularAcceleration = torque / this.momentOfInertia;
+       if(this.isTrple) {
+         var torque = (this.height - this.centerOfMass)* this.thrust.clone().y * 3 * this.currentGimbal;
+         var angularAcceleration = torque / this.momentOfInertia;  //acceleration = torque force / Moment of Inertia
+       }
+       else {
+         var torque = (this.height - this.centerOfMass)* this.thrust.clone().y * this.currentGimbal;
+         var angularAcceleration = torque / this.momentOfInertia;  //acceleration = torque force / Moment of Inertia
+       }
 
 		 this.rotation += angularAcceleration * dt;
 		 }
@@ -287,10 +301,19 @@ var GRAVITY = new Victor(0,9.81);
 
 		 //calculate thrust force
 		 if(this.isThrottle){
-       this.fuel-= (this.massFlowRate * dt * this.throttle);
-       if(this.fuel <=0) this.throttleOff();
-       this.currentMass = this.massFinal + this.fuel;
-		 this.thrustAccel = this.thrust.clone().rotateDeg(this.rotation).multiplyScalar(this.MIN_THROTTLE).divideScalar(this.currentMass);
+       if(this.isTriple) {
+         this.fuel-= (3 * this.massFlowRate * dt * this.throttle);
+         if(this.fuel <=0) this.throttleOff();
+         this.currentMass = this.massFinal + this.fuel;
+         this.thrustAccel = this.thrust.clone().rotateDeg(this.rotation).multiplyScalar(this.throttle).multiplyScalar(3).divideScalar(this.currentMass);
+       }
+       else {
+         this.fuel-= (this.massFlowRate * dt * this.throttle);
+         if(this.fuel <=0) this.throttleOff();
+         this.currentMass = this.massFinal + this.fuel;
+         this.thrustAccel = this.thrust.clone().rotateDeg(this.rotation).multiplyScalar(this.throttle).divideScalar(this.currentMass);
+
+       }
 		 //this.thrustAccel = this.thrust.clone().multiplyScalar(this.MIN_THROTTLE).divideScalar(this.massFinal);
 		//multiplyScalar(Math.sin(this.currentGimbal * Math.PI /180))
 		 this.acceleration.add(this.thrustAccel);
@@ -318,6 +341,7 @@ var GRAVITY = new Victor(0,9.81);
 
 		 //update exhaust
 		 this.exhaust.update({x: 0, y: 0}, dt, this.velocity);
+     this.tripleExhaust.update({x: 0, y: 0}, dt, this.velocity);
 
 
 		 if(this.debug){
@@ -328,21 +352,14 @@ var GRAVITY = new Victor(0,9.81);
 	 },
 
 	 borderCheck : function(){
-		 if(this.position.x> app.main.WIDTH){
-			 console.log("Out of Bounds");
-		 }
+		 if(this.position.x> app.main.WIDTH + 50 ||
+        this.position.y> app.main.HEIGHT + 100 ||
+         this.position.x< -50 ||
+          this.position.y<0) {
+            return true;
+          }
+          return false;
 
-		 if(this.position.y> app.main.HEIGHT){
-			 console.log("Out of Bounds");
-		 }
-
-		 if(this.position.x<0){
-			 console.log("Out of Bounds");
-		 }
-
-		 if(this.position.y<0){
-			 console.log("Out of Bounds");
-		 }
 	 },
 
 	 changeGimbal : function(targetValue, dt){
@@ -391,6 +408,24 @@ var GRAVITY = new Victor(0,9.81);
 		 if(this.debug) console.log("Throttle Off called");
 	 },
 
+   tripleOn : function(dt){
+     //debugger;
+     if(this.fuel > 0) {
+       if(this.isTriple!=true) {
+         this.isTriple=true;
+       }
+  		 if(this.debug) console.log("Triple On called");
+     }
+
+	 },
+
+   tripleOff : function(dt){
+		 if(this.isTriple!=false) {
+       this.isTriple=false;
+     }
+		 if(this.debug) console.log("Triple off called");
+	 },
+
 	 runAI: function() {
 		 for(var i = 0; i < this.aiFunctions.length; i++) {
 			this.aiFunctions[i]();
@@ -421,31 +456,36 @@ var GRAVITY = new Victor(0,9.81);
      rocket.fuelInitial = rocket.massInitial - rocket.massFinal;
      rocket.fuelPercentage = rocket.fuel / rocket.fuelInitial;
 
-
 		//moment of inertia
 		//I of Rod(Center) = (mass*Length^2)/12
-
 		 rocket.momentOfInertia = (rocket.currentMass * rocket.centerOfMass * rocket.centerOfMass)/12;
+
+     //rotation
+     rocket.rotation = 0;
 
 		 rocket.aiFunctions = new Array();
 	 },
 
    drawSplash: function(ctx, dt) {
-     var shakeX = (Math.random() * 2) - 2;
-     var shakeY = (Math.random() * 2) - 2;
      ctx.save();
-     ctx.translate(app.main.WIDTH-100 * shakeX * dt, app.main.HEIGHT/4 * shakeY*dt);
+     ctx.translate((app.main.WIDTH/2) +150 , app.main.HEIGHT / 2 - 100);
      ctx.rotate(45 * (Math.PI / 180));
      ctx.scale(0.4, 0.4);
-     ctx.drawImage(app.rocket.ROCKET_SPRITE.STOWED,0,0,app.rocket.ROCKET_SPRITE.STOWED.width,app.rocket.ROCKET_SPRITE.STOWED.height);
+     //ctx.drawImage(app.rocket.ROCKET_SPRITE.STOWED,0,0,app.rocket.ROCKET_SPRITE.STOWED.width,app.rocket.ROCKET_SPRITE.STOWED.height);
+     ctx.drawImage(app.rocket.ROCKET_SPRITE.DEPLOYED,0,0,app.rocket.ROCKET_SPRITE.DEPLOYED.width,app.rocket.ROCKET_SPRITE.STOWED.height);
 
      ctx.save();
-     ctx.translate(app.rocket.ROCKET_SPRITE.STOWED.width / 2, app.rocket.ROCKET_SPRITE.STOWED.height);
+     //ctx.translate(app.rocket.ROCKET_SPRITE.STOWED.width / 2, app.rocket.ROCKET_SPRITE.STOWED.height);
+     ctx.translate(app.rocket.ROCKET_SPRITE.DEPLOYED.width / 2, app.rocket.ROCKET_SPRITE.DEPLOYED.height);
      ctx.rotate(this.currentGimbal * Math.PI / 180);
       //exhaust
       if(app.rocket.exhaust != undefined) {
-         app.rocket.exhaust.update({x: 0, y: 0}, dt, this.velocity);
-        app.rocket.exhaust.draw(ctx);
+        ctx.scale(1.5,1.5);
+         app.rocket.exhaust.update({x: 0, y: -50}, dt, new Victor(5, -40));
+         app.rocket.tripleExhaust.update({x:  -app.rocket.width / 2, y: -50}, dt, new Victor(5, -40));
+         app.rocket.tripleExhaust.update({x:  app.rocket.width / 2, y: -50}, dt, new Victor(5, -40));
+         app.rocket.exhaust.draw(ctx);
+         app.rocket.tripleExhaust.draw(ctx);
       }
 
      ctx.restore();

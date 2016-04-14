@@ -2,8 +2,11 @@
 <html lang="en>
 <head>
 <meta charset="utf-8">
+<link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
 <title>Rocket Lander</title>
 <style>
+	font-family: 'Press Start 2P', cursive;
+	
 canvas
 {
 border: solid 1px black;
@@ -87,7 +90,7 @@ Get a real browser
 					<option value=".5">.4</option>
 					<option value=".7">.7</option>
 					<option value=".9">.9</option>
-				</select> 
+				</select>
 				<br/>
 				then
 				<select id="effect">
@@ -96,7 +99,7 @@ Get a real browser
 					<option value="UC"> Rotate Counter-clockwise</option>
 					<option value="RR"> Remove Rotation</option>
 					<option value="NO"> Do Nothing</option>
-				</select> 
+				</select>
 				<br/>
 				Enable Command Node:
 				<select id="enableNode">
@@ -111,7 +114,7 @@ Get a real browser
 					<option value="N8"> Node8</option>
 					<option value="N9"> Node9</option>
 					<option value="N10"> Node10</option>
-				</select> 
+				</select>
 				<br/>
 				Disable Command Node:
 				<select id="disableNode">
@@ -126,7 +129,7 @@ Get a real browser
 					<option value="N8"> Node8</option>
 					<option value="N9"> Node9</option>
 					<option value="N10"> Node10</option>
-				</select> 
+				</select>
 				<br/>
 					<input type="checkbox" id="enableCheckBox" name="enabledAtStart" value="EAS" checked>Enabled at start?
 				</div>
@@ -136,7 +139,8 @@ Get a real browser
 					<button id='autoPilot'>Engage Auto Pilot</button>
 				</div>
 				Use 'W' to thrust!
-				<br/>Press 'A' and 'D' to rotate!
+				<br/>Press 'A' and 'D' to gimbal engine!
+				<br/>Press 'Shift' to use 3 engines!
 			</div>
 		</div>
 	</div>

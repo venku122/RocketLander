@@ -1,5 +1,5 @@
 // All of these functions are in the global scope
-		
+
 "use strict";
 
 // returns mouse position in local coordinate system of element
@@ -11,6 +11,7 @@ function getMouse(e){
 }
 
 function withinRectangle(mouseX,mouseY,x,y,width,height){
+	if(app.main.debug) app.main.ctx.fillRect(x,y,width,height);
 	if(mouseY > y && mouseY < y + height) {
 		if(mouseX > x && mouseX < x + width) {
 			return true
@@ -57,7 +58,7 @@ function getRandomUnitVector(){
 		x /= length;
 		y /= length;
 	}
-	
+
 	return {x:x, y:y};
 }
 
@@ -78,7 +79,7 @@ function loadImagesWithCallback(sources, callback) {
 	var imageObjects = [];
 	var numImages = sources.length;
 	var numLoadedImages = 0;
-	
+
 	for (var i = 0; i < numImages; i++) {
 	  imageObjects[i] = new Image();
 	  imageObjects[i].onload = function() {
@@ -88,7 +89,7 @@ function loadImagesWithCallback(sources, callback) {
 		  callback(imageObjects); // send the images back
 		}
 	  };
-	  
+
 	  imageObjects[i].src = sources[i];
 	}
   }
@@ -99,7 +100,7 @@ Function Name: clamp(val, min, max)
 Author: Web - various sources
 Return Value: the constrained value
 Description: returns a value that is
-constrained between min and max (inclusive) 
+constrained between min and max (inclusive)
 */
 function clamp(val, min, max){
 	return Math.max(min, Math.min(max, val));
@@ -142,7 +143,7 @@ function gradientNode(x, y) {
  function lerp(a0, a1, w) {
      return (1.0 - w)*a0 + w*a1;
  }
- 
+
  // Computes the dot product of the distance and gradient vectors.
  function dotGridGradient(ix, iy, x, y) {
      // Compute the distance vector
@@ -160,12 +161,12 @@ function perlin(x, y) {
 	var x1 = x0 + 1;
 	var y0 = (y > 0.0 ? y : y - 1);
 	var y1 = y0 + 1;
- 
+
 	// Determine interpolation weights
 	// Could also use higher order polynomial/s-curve here
 	var sx = x - x0;
 	var sy = y - y0;
- 
+
 	// Interpolate between grid point gradients
 	var n0, n1, ix0, ix1, value;
 	n0 = dotGridGradient(x0, y0, x, y);
@@ -175,8 +176,6 @@ function perlin(x, y) {
 	n1 = dotGridGradient(x1, y1, x, y);
 	ix1 = lerp(n0, n1, 1);
 	value = lerp(ix0, ix1, 1);
- 
+
 	return value - 1;
 }
-
-

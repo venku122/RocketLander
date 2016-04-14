@@ -24,8 +24,9 @@ var app = app || {};
 		DEFAULT: 1,
 		LANDED: 2,
 		DESTROYED: 3,
-		OPTIONS: 4,
-    SPLASH: 5
+		INSTRUCTIONS: 4,
+    SPLASH: 5,
+    CREDITS: 6
 	}),
 	GAME_MODE: {
 		MOUNTAIN: 0,
@@ -63,6 +64,12 @@ var app = app || {};
 	},
 	maxLandingVelocity: 25,
 	PAUSED: false,
+
+  //scoring attributes
+  score: 0,
+  closeBonus: 5000,
+  fuelBonus: 2000,
+  speedBonus: 50,
 
 	init : function(){
 		if(this.debug) console.log("app.main.init() called");
@@ -120,7 +127,7 @@ var app = app || {};
 		main.BUTTON_GRAPHICS.SEA.crossOrigin = "anonymous";
 		main.BUTTON_GRAPHICS.SEA.crossOrigin = "anonymous";
 
-		main.BUTTON_GRAPHICS.SEA_X = 35;
+		main.BUTTON_GRAPHICS.SEA_X = main.WIDTH/3 - 50;
 		main.BUTTON_GRAPHICS.SEA_Y = main.HEIGHT / 3 * 2;
 		main.BUTTON_GRAPHICS.MOUNTAIN_X = main.BUTTON_GRAPHICS.SEA_X + main.BUTTON_GRAPHICS.SEA.width + 50;
 		main.BUTTON_GRAPHICS.MOUNTAIN_Y = main.BUTTON_GRAPHICS.SEA_Y;
@@ -149,8 +156,10 @@ var app = app || {};
 			this.drawBG();
 			app.rocket.drawSplash(this.ctx, dt);
 			this.drawUI();
+      this.drawTimer(this.ctx, this.timer, 5);
 			this.timer+= dt;
-			if(this.timer>= 5 || myKeys.keydown[myKeys.KEYBOARD.KEY_ENTER]) this.state = this.GAME_STATE.START;
+      if(app.audioHandler.Sounds.FLIGHT.buffer != undefined && app.audioHandler.Sounds.FLIGHT.nodes.length == 0) app.audioHandler.playLoop(app.audioHandler.Sounds.FLIGHT, 6);
+			if(this.timer>= 5 || Object.keys(myKeys.keydown).length != 0) this.state = this.GAME_STATE.START;
 			break;
 
 			case this.GAME_STATE.START:
@@ -160,18 +169,34 @@ var app = app || {};
 				this.mode = this.GAME_MODE.MOUNTAIN;
 				this.generatePeaks(this.HEIGHT - 100);
 				this.state = this.GAME_STATE.DEFAULT;
-				//app.audioHandler.playSound(app.audioHandler.SOUNDS.FLIGHT);
+				app.audioHandler.stopSound(app.audioHandler.SOUNDS.FLIGHT);
 			}
 			if(myKeys.keydown[myKeys.KEYBOARD.KEY_S]) {
 				this.mode = this.GAME_MODE.SEA;
 				this.generatePeaks(this.HEIGHT  - 100);
 				this.state = this.GAME_STATE.DEFAULT;
-				//app.audioHandler.playSound(app.audioHandler.SOUNDS.FLIGHT);
+				app.audioHandler.stopSound(app.audioHandler.SOUNDS.FLIGHT);
 			}
-
 			break;
 
+      case this.GAME_STATE.INSTRUCTIONS:
+        this.drawBG();
+        this.drawUI();
+        if(myKeys.keydown[myKeys.KEYBOARD.KEY_SPACE]) {
+          this.state = this.GAME_STATE.START;
+        }
+      break;
+
+      case this.GAME_STATE.CREDITS:
+        this.drawBG();
+        this.drawUI();
+        if(myKeys.keydown[myKeys.KEYBOARD.KEY_SPACE]) {
+          this.state = this.GAME_STATE.START;
+        }
+      break;
+
 			case this.GAME_STATE.DEFAULT:
+      if(app.audioHandler.Sounds.FLIGHT.nodes.length!=0) app.audioHandler.stopSound(app.audioHandler.Sounds.FLIGHT);
 			if(this.PAUSED == false) {
 				//get deltaTime
 				//collect input
@@ -183,8 +208,13 @@ var app = app || {};
 				//check for throttle
 				if(myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOn(dt);
 				if(!myKeys.keydown[myKeys.KEYBOARD.KEY_W]) app.rocket.throttleOff(dt);
+
+        //check for triple engines
+        if(myKeys.keydown[myKeys.KEYBOARD.KEY_SHIFT]) app.rocket.tripleOn(dt);
+				if(!myKeys.keydown[myKeys.KEYBOARD.KEY_SHIFT]) app.rocket.tripleOff(dt);
+
 				// TODO: Make a different control scheme or toggle for this as it breaks AI controls
-	
+
 				if(app.rocket.autopilot == true) {
 					if(this.target.x > app.rocket.position.x + 20) {
 						app.rocket.changeGimbal(-5, dt);
@@ -199,13 +229,13 @@ var app = app || {};
 						app.rocket.throttleOff();
 					}
 				}
-				
+
 				//update
 				app.rocket.update(dt);
 			}
 			if(this.state == this.GAME_STATE.DEFAULT){
 				if(this.checkForCollisions(app.rocket) || this.shakeTimer != null) {
-					if( !this.didLandSafely(app.rocket) || this.shakeTimer != null){
+					if(!this.didLandSafely(app.rocket) || this.shakeTimer != null){
 						shake(.005, 1);
 						if(this.mode != this.GAME_MODE.SEA)
 						{
@@ -220,10 +250,12 @@ var app = app || {};
 							this.shakeTimer -= dt;
 						}
 						if(this.shakeTimer < 0) {
+              if(app.audioHandler.Sounds.ENGINE.nodes.length!=0) app.audioHandler.stopSound(app.audioHandler.Sounds.ENGINE);
 							this.state = this.GAME_STATE.DESTROYED;
 						}
 					}
 					else{
+            if(app.audioHandler.Sounds.ENGINE.nodes.length!=0) app.audioHandler.stopSound(app.audioHandler.Sounds.ENGINE);
 						this.state = this.GAME_STATE.LANDED;
 					}
 				}
@@ -329,6 +361,10 @@ var app = app || {};
 			if(rocket.velocity.length() >= this.maxLandingVelocity){
 				return false;
 			}
+      debugger;
+      this.score = (this.closeBonus / (rocket.position.x - this.target.x) ) //points for getting close to the center
+      + (rocket.fuel * this.fuelBonus) //points for having fuel remaining
+       - (rocket.velocity.y * this.speedBonus); //points taken away for landing fast
 			return true;
 		}
 	},
@@ -339,6 +375,12 @@ var app = app || {};
 			if(Math.abs(rocket.position.y + rocket.height - this.mountainPeaks[index]) < this.landDifferential ||rocket.position.y + rocket.height > this.mountainPeaks[index]) {
 				return true;
 			}
+      if(rocket.position.x> app.main.WIDTH + 200 ||
+         rocket.position.y> app.main.HEIGHT + 100 ||
+          rocket.position.x< -200 ||
+           rocket.position.y< -200) {
+             return true;
+           }
 		}
 		return false;
 
@@ -349,17 +391,23 @@ var app = app || {};
 		switch(this.state){
 
       case this.GAME_STATE.SPLASH:
+      //draw menu text
+      this.ctx.font = "35px 'Press Start 2P'";
+      this.ctx.textAlign = "center";
+      this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/6 );
 
       break;
 
 			case this.GAME_STATE.START:
 				//draw menu text
-				this.ctx.font=" 40px monospace";
+				this.ctx.font = "35px 'Press Start 2P'";
 				this.ctx.textAlign = "center";
-				this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/3 );
-				//this.ctx.fillText("Press M for Mars or S for sea", this.WIDTH/2,this.HEIGHT/2 )
-				this.ctx.fillText("Ocean", 85, this.HEIGHT-175);
-				this.ctx.fillText("Mars", 85 + 250, this.HEIGHT-175);
+				this.ctx.fillText("Rocket Lander", this.WIDTH/2,this.HEIGHT/6 );
+        this.ctx.fillText("Instructions", this.WIDTH/2, this.HEIGHT / 6 + 100);
+        this.ctx.fillText("Credits", this.WIDTH/2, this.HEIGHT / 6 + 200);
+        this.ctx.fillText("Click Below", this.WIDTH/2, this.HEIGHT / 6 + 400);
+				this.ctx.fillText("Ocean", 375, this.HEIGHT-375);
+				this.ctx.fillText("Mars", 375 + 250, this.HEIGHT-375);
 				this.drawButtons();
 				break;
 
@@ -375,17 +423,38 @@ var app = app || {};
 			break;
 			case this.GAME_STATE.LANDED:
 				//draw menu text
-				this.ctx.font=" 40px monospace";
+				this.ctx.font="20px 'Press Start 2P'";
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("The rocket has landed!", this.WIDTH/2,this.HEIGHT/3 );
-				this.ctx.fillText("Press space to Restart", this.WIDTH/2,this.HEIGHT/3 + 50 );
+        this.ctx.fillText("Your score was: " + Math.round(this.score), this.WIDTH/2,this.HEIGHT/3 + 50 );
+				this.ctx.fillText("Press space to restart", this.WIDTH/2,this.HEIGHT/3 + 150 );
 			break;
 			case this.GAME_STATE.DESTROYED:
 				//draw menu text
-				this.ctx.font=" 40px monospace";
+				this.ctx.font="20px 'Press Start 2P'";
 				this.ctx.textAlign = "center";
 				this.ctx.fillText("You were destroyed", this.WIDTH/2,this.HEIGHT/3 );
-				this.ctx.fillText("Press space to Restart", this.WIDTH/2,this.HEIGHT/3 + 50 );
+				this.ctx.fillText("Press space to restart", this.WIDTH/2,this.HEIGHT/3 + 50 );
+			break;
+
+      case this.GAME_STATE.CREDITS:
+				//draw menu text
+				this.ctx.font="30px 'Press Start 2P'";
+				this.ctx.textAlign = "center";
+				this.ctx.fillText("Developed by: ", this.WIDTH/2,this.HEIGHT/3 );
+				this.ctx.fillText("T.J. Tarazevits", this.WIDTH/2,this.HEIGHT/3 + 50 );
+        this.ctx.fillText("Aidan McInerny", this.WIDTH/2,this.HEIGHT/3 + 100 );
+        this.ctx.fillText("Press space to return", this.WIDTH/2,this.HEIGHT/3 + 150 );
+			break;
+
+      case this.GAME_STATE.INSTRUCTIONS:
+				//draw menu text
+				this.ctx.font="30px 'Press Start 2P'";
+				this.ctx.textAlign = "center";
+				this.ctx.fillText("Use 'W' to thrust!", this.WIDTH/2,this.HEIGHT/3 );
+				this.ctx.fillText("Press 'A' and 'D' to gimbal", this.WIDTH/2,this.HEIGHT/3 + 50 );
+        this.ctx.fillText("Press 'Shift' to use 3 engines!", this.WIDTH/2,this.HEIGHT/3 + 100 );
+        this.ctx.fillText("Press space to return", this.WIDTH/2,this.HEIGHT/3 + 150 );
 			break;
 		}
 	},
@@ -589,7 +658,7 @@ var app = app || {};
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("Autopilot:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 103);
 			this.uictx.restore();
-			
+
 			// Offradar:
 			this.uictx.beginPath();
 			this.uictx.arc(this.landingIndicator.X, this.landingIndicator.Y + 120, this.landingIndicator.radius, 0, 2 * Math.PI);
@@ -605,7 +674,7 @@ var app = app || {};
 			this.uictx.fillStyle = "white";
 			this.uictx.fillText("In Radar:", this.landingIndicator.X - 50, this.landingIndicator.Y  + 123);
 			this.uictx.restore();
-			
+
 			//-------------------------------------------------------------------
 			//Fuel Indicator ----------------------------------------------------
 			//Create a gradient that will map the ammount of fuel to how much has been used
@@ -739,9 +808,18 @@ var app = app || {};
 		this.ctx.strokeRect(this.BUTTON_GRAPHICS.MOUNTAIN_X, this.BUTTON_GRAPHICS.MOUNTAIN_Y, this.BUTTON_GRAPHICS.MOUNTAIN.width, this.BUTTON_GRAPHICS.MOUNTAIN.height )
 	},
 
+  drawTimer: function(ctx, currentTime, goal) {
+    //debugger;
+      ctx.save();
+      ctx.fillStyle = "red";
+      ctx.fillRect(20, this.HEIGHT/3, (this.WIDTH - 20) * (currentTime / goal), 20);
+      ctx.restore();
+  },
+
 	doMouseDown: function(e) {
 		var mouse = getMouse(e);
-
+    this.ctx.font = "35px 'Press Start 2P'";
+    debugger;
 		switch(this.state) {
 			case this.GAME_STATE.START:
 			if(withinRectangle(mouse.x, mouse.y,
@@ -758,13 +836,23 @@ var app = app || {};
 				this.mode = this.GAME_MODE.MOUNTAIN;
 				this.generatePeaks(this.HEIGHT - 100);
 			}
+      else if(withinRectangle(mouse.x, mouse.y,
+        0, this.HEIGHT / 6 + 60,
+       this.WIDTH, 80)) {
+         this.state = this.GAME_STATE.INSTRUCTIONS;
+       }
+       else if(withinRectangle(mouse.x, mouse.y,
+         0, this.HEIGHT / 6 + 160,
+        this.WIDTH, 80)) {
+          this.state = this.GAME_STATE.CREDITS;
+        }
 			break;
 		}
 
 	},
 
  }
- 
+
  app.inputHandler = {
 	 leftHand: undefined,
 	 rightHand: undefined,
@@ -774,7 +862,7 @@ var app = app || {};
 	 enableNode: undefined,
 	 disableNode: undefined,
 	 addCommandButton: undefined,
-	 
+
 	 init: function() {
 		 //TODO: Rethink this.  There are some things in here that are good in theory but don't work in practice
 		 //this.leftHand = document.getElementById('leftHand');
@@ -785,14 +873,14 @@ var app = app || {};
 		 //this.disableNode = document.getElementById('disableNode');
 		 //this.checkBox = document.getElementById('enableCheckBox');
 		 //this.addCommandButton = document.getElementById('addCommandNode');
-		 
+
 		 //this.addCommandButton.onclick = this.processInputs;
 	 },
-	 
+
 	 processInputs: function(){
 		 var leftHandValue = app.inputHandler.handleOperands(app.inputHandler.leftHand.value);
 		 var rightHandValue = app.inputHandler.handleOperands(app.inputHandler.rightHand.value);
-		 
+
 		 switch(app.inputHandler.operator.value) {
 			 case"==":
 				switch(app.inputHandler.effect.value) {
@@ -810,30 +898,30 @@ var app = app || {};
 								}
 							});
 						break;
-						
+
 					}
 			 break;
 			 case"!=":
-			 
+
 			 break;
 			 case">" :
-			 
+
 			 break;
 			 case">=":
-			 
+
 			 break;
 			 case"<" :
-			 
+
 			 break;
 			 case"<=":
-			 
+
 			 break;
 			 default:
 			 break;
 		 }
-		 
+
 	 },
-	 
+
 	 handleOperands: function(value){
 		 switch(value) {
 			case "XP" :
@@ -915,7 +1003,7 @@ var app = app || {};
 			return 0;
 		 }
 	 },
-	 
+
 	 handleNodeNumber: function(value){
 		 switch(value) {
 			 case "NO" :
@@ -942,10 +1030,10 @@ var app = app || {};
 			 return 9;
 			 default:
 			 return -1;
-			 
+
 		 }
 	 }
-	 
+
  }
 
  /*
