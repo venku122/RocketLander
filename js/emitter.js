@@ -3,9 +3,10 @@
 // last modified: 10/7/2015
 
 "use strict";
-var app = app || {};
+const app = window.app || {};
+window.app = app;
 
-app.Emitter=function(){
+app.Emitter = (function() {
 
 	function Emitter(){
 		// public
@@ -19,7 +20,7 @@ app.Emitter=function(){
 		this.minYspeed = 2;
 		this.maxYspeed = 4;
 		this.startRadius = 4;
-		this.expansionRate = 0.3
+		this.expansionRate = 0.3;
 		this.decayRate = 2.5;
 		this.lifetime = 100;
 		this.red = 0;
@@ -28,20 +29,20 @@ app.Emitter=function(){
 
 		// private
 		this._particles = undefined;
-	};
+	}
 
 
 	// "public" methods
-	var p=Emitter.prototype;
+	const p = Emitter.prototype;
 
 	p.createParticles = function(emitterPoint){
 		// initialize particle array
 		this._particles = [];
 
 		// create exhaust particles
-		for(var i=0; i< this.numParticles; i++){
+		for (let i = 0; i < this.numParticles; i++) {
 			// create a particle object and add to array
-			var p = {};
+			const p = {};
 			this._particles.push(_initParticle(this, p, emitterPoint, new Victor(0,0)));
 		}
 
@@ -56,8 +57,8 @@ app.Emitter=function(){
 			// make it bigger, and fade it out
 			// increase its age so we know when to recycle it
 
-			for(var i=0;i<this._particles.length;i++){
-				var p = this._particles[i];
+			for (let i = 0; i < this._particles.length; i++) {
+				const p = this._particles[i];
 
 				p.age += this.decayRate;
 				p.r += this.expansionRate;
@@ -66,10 +67,10 @@ app.Emitter=function(){
 				p.x += p.xSpeed;
 				p.y += p.ySpeed;
 
-				var alpha = 1 - p.age/this.lifetime;
+				const alpha = 1 - p.age/this.lifetime;
 
 				// if the particle is too old, recycle it
-				if(p.age >= this.lifetime){
+				if (p.age >= this.lifetime) {
 					_initParticle(this, p, emitterPoint, currentSpeed);
 				}
 
@@ -77,24 +78,22 @@ app.Emitter=function(){
 	}
 
 	p.draw =  function(ctx){
-		for(var i=0;i<this._particles.length;i++){
-				var p = this._particles[i];
-				var alpha = 1 - p.age/this.lifetime;
+		for (let i = 0; i < this._particles.length; i++) {
+				const p = this._particles[i];
+				const alpha = 1 - p.age/this.lifetime;
 				ctx.save();
 				if(this.useSquares){
 
 
 					// fill a rectangle
-					ctx.fillStyle = "rgba(" + this.red + "," + this.green + "," +
-					this.blue + "," + alpha + ")";
+					ctx.fillStyle = `rgba(${this.red},${this.green},${this.blue},${alpha})`;
 					ctx.fillRect(p.x, p.y, p.r, p.r);
 					// note: this code is easily modified to draw images
 				}
 
 				if(this.useCircles){
 					// fill a circle
-					ctx.fillStyle = "rgba(" + this.red + "," + this.green + "," +
-					this.blue + "," + alpha + ")";
+					ctx.fillStyle = `rgba(${this.red},${this.green},${this.blue},${alpha})`;
 
 					ctx.beginPath();
 					ctx.arc(p.x, p.y, p.r, Math.PI * 2, false);
@@ -108,7 +107,7 @@ app.Emitter=function(){
 	function _initParticle(obj, p, emitterPoint, initialSpeed){
 
 		// give it a random age when first created
-		p.age = getRandom(0,obj.lifetime);
+		p.age = getRandom(0, obj.lifetime);
 
 		p.x = emitterPoint.x + getRandom(-obj.xRange, obj.xRange);
 		p.y = emitterPoint.y + getRandom(0, obj.yRange);
@@ -118,8 +117,8 @@ app.Emitter=function(){
 	//	p.xSpeed = -initialSpeed.x / 10;
 		p.ySpeed = -initialSpeed.y / 5;
 		return p;
-	};
+	}
 
 
 	return Emitter;
-}();
+})();

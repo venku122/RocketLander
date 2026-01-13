@@ -1,4 +1,4 @@
-!function() {
+(() => {
 
 
 /*
@@ -13,26 +13,24 @@ window.Draw = {
   height:  window.innerHeight,
   
   init: function() {
-    this.ctx = this.canvas.getContext( '2d' )
-    
-    this.Graph.draw = this.Graph.draw.bind( this.Graph )
-    
+    this.ctx = this.canvas.getContext('2d')
+    this.Graph.draw = this.Graph.draw.bind(this.Graph)
     Draw.resize()
 
 	//TODO: Decide whether or not we should have dynamic window resizing
     //window.onresize = Draw.resize
 
-    window.requestAnimationFrame( this.Graph.draw )
+    window.requestAnimationFrame(this.Graph.draw)
   },
 
   resize: function() {
 	//TODO: This is not an ideal solution for size.  We want to set a Size but for right
 	//now we do not want it to be a 'set' size.
-    Draw.width  = window.innerWidth / 3 * 2,
+    Draw.width = window.innerWidth / 3 * 2
     Draw.height = window.innerHeight / 3 * 2
  
-    Draw.canvas.setAttribute( 'width',  Draw.width  )
-    Draw.canvas.setAttribute( 'height', Draw.height )
+    Draw.canvas.setAttribute('width', Draw.width)
+    Draw.canvas.setAttribute('height', Draw.height)
   },
 
   /*
@@ -50,23 +48,23 @@ window.Draw = {
       this.animate()
       this.render()
 
-      window.requestAnimationFrame( this.draw )
+      window.requestAnimationFrame(this.draw)
     },
     
     setup: function() {},
 
     animate: function() {
-      for( var i = 0; i < this.children.length; i++ ) {
-        this.children[ i ].animate()
+      for (let i = 0; i < this.children.length; i++) {
+        this.children[i].animate()
       }
     },
 
     render:  function() {
-      for( var i = 0; i < this.children.length; i++ ) {
-        this.children[ i ].draw()
+      for (let i = 0; i < this.children.length; i++) {
+        this.children[i].draw()
       }
     },
   }
 }
 
-}()
+})()
