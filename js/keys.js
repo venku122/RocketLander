@@ -3,7 +3,7 @@
 
 "use strict";
 
-var myKeys = {};
+const myKeys = {};
 
 myKeys.KEYBOARD = Object.freeze({
 	"KEY_LEFT": 37,
@@ -30,18 +30,18 @@ myKeys.keydown = [];
 
 
 // event listeners
-window.addEventListener("keydown",function(e){
-	console.log("keydown=" + e.keyCode);
+window.addEventListener("keydown", (e) => {
+	console.log(`keydown=${e.keyCode}`);
 	myKeys.keydown[e.keyCode] = true;
 });
 
-window.addEventListener("keyup",function(e){
-	console.log("keyup=" + e.keyCode);
+window.addEventListener("keyup", (e) => {
+	console.log(`keyup=${e.keyCode}`);
 	myKeys.keydown[e.keyCode] = false;
 
 	// pausing and resuming
-	var char = String.fromCharCode(e.keyCode);
-	if (char == "p" || char == "P"){
+	const char = String.fromCharCode(e.keyCode);
+	if (char === "p" || char === "P") {
 		if (app.main.paused){
 			app.main.resumeGame();
 		} else {

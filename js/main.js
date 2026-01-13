@@ -8,7 +8,8 @@
 
 // if app exists use the existing copy
 // else create a new object literal
-var app = app || {};
+const app = window.app || {};
+window.app = app;
 
 /*
  .main is an object literal that is a property of the app global
@@ -95,37 +96,37 @@ var app = app || {};
 
 
 		//Set up external buttons
-		var pauseButton = document.getElementById("pauseResumeButton");
-		pauseButton.onclick = function(e){
-			if(app.main.PAUSED) {
+		const pauseButton = document.getElementById("pauseResumeButton");
+		pauseButton.onclick = (e) => {
+			if (app.main.PAUSED) {
 				app.main.PAUSED = false;
-				e.target.textContent = "Pause"
+				e.target.textContent = "Pause";
 			} else {
 				app.main.PAUSED = true;
-				e.target.textContent = "Un-Pause"
+				e.target.textContent = "Un-Pause";
 			}
-		}
-		var aiButton = document.getElementById("autoPilot");
-		aiButton.onclick = function(e){
-			if(app.rocket.autopilot) {
+		};
+		const aiButton = document.getElementById("autoPilot");
+		aiButton.onclick = (e) => {
+			if (app.rocket.autopilot) {
 				app.rocket.autopilot = false;
-				e.target.textContent = "Engage Auto Pilot"
+				e.target.textContent = "Engage Auto Pilot";
 			} else {
 				app.rocket.autopilot = true;
-				e.target.textContent = "Disable Auto Pilot"
+				e.target.textContent = "Disable Auto Pilot";
 			}
-		}
+		};
 
-    var muteButton = document.getElementById("muteButton");
-		muteButton.onclick = function(e){
+    const muteButton = document.getElementById("muteButton");
+		muteButton.onclick = () => {
 			app.audioHandler.muteAudio();
-		}
+		};
 
 		this.update();
 	},
 
 	imageLoader : function(images) {
-		var main = app.main;
+		const main = app.main;
 		main.BUTTON_GRAPHICS.SEA.src = images.sea.src;
 		main.BUTTON_GRAPHICS.MOUNTAIN.src = images.mountain.src;
 
@@ -147,7 +148,7 @@ var app = app || {};
 		//requestAnimationFrame(this.update.bind(this));
 		this.animationID = requestAnimationFrame(this.update.bind(this));
 
-    var dt = this.calculateDeltaTime();
+    let dt = this.calculateDeltaTime();
     this.time += dt;
 
 		if(myKeys.keydown[myKeys.KEYBOARD.KEY_U]){
@@ -309,29 +310,29 @@ var app = app || {};
 
 	generatePeaks: function(startY){
 		this.mountainPeaks = new Array(this.width);
-		var y = startY;
+		let y = startY;
 
 		if(this.mode == this.GAME_MODE.SEA) {
 			y = this.HEIGHT / 10 * 9;
-			for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
-				var noise = perlin(x, 50);
+			for (let x = 0; x < this.WIDTH; x += this.mountainIndex) {
+				let noise = perlin(x, 50);
 				this.mountainPeaks[x] = y;
 				//y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
 			}
 		} else {
-			for (var x = 0; x < this.WIDTH; x += this.mountainIndex) {
-				var noise = perlin(x, 50);
+			for (let x = 0; x < this.WIDTH; x += this.mountainIndex) {
+				let noise = perlin(x, 50);
 				this.mountainPeaks[x] = y;
 				y += (noise * 5 * (Math.random() > .5 ? 1 : -1));
 			}
 		}
 
 		if(this.mode == this.GAME_MODE.MOUNTAIN) {
-			var min = 15;
-			var range = 20;
-			var rand = map_range(Math.random(), 0, 1, min, min + range);
+			let min = 15;
+			let range = 20;
+			let rand = map_range(Math.random(), 0, 1, min, min + range);
 			rand = Math.round(rand);
-			var startIndex = map_range(Math.random(), 0, 1, 0, (this.WIDTH / (this.mountainIndex )) - min - range);
+			let startIndex = map_range(Math.random(), 0, 1, 0, (this.WIDTH / (this.mountainIndex )) - min - range);
 			startIndex = Math.floor(startIndex);
 			this.clearHeight = this.mountainPeaks[startIndex - startIndex % 5];
 			for(x = startIndex * this.mountainIndex; x < startIndex * this.mountainIndex + (rand * this.mountainIndex); x += this.mountainIndex) {
@@ -340,7 +341,7 @@ var app = app || {};
 			this.target.x = startIndex * this.mountainIndex + (rand * this.mountainIndex / 2);
 			this.target.y = this.clearHeight;
 		} else if(this.mode == this.GAME_MODE.SEA) {
-			var rand = map_range(Math.random(), 0, 1, this.WIDTH / 5, this.WIDTH / 5 * 4);
+			let rand = map_range(Math.random(), 0, 1, this.WIDTH / 5, this.WIDTH / 5 * 4);
 			this.target.x = rand - rand % this.mountainIndex;
 			this.target.y = y;
 		}
@@ -350,7 +351,7 @@ var app = app || {};
 		// what's with (+ new Date) below?
 		// + calls Date.valueOf(), which converts it from an object to a
 		// primitive (number of milliseconds since January 1, 1970 local time)
-		var now,fps;
+		let now,fps;
 		now = (+new Date);
 		fps = 1000 / (now - this.lastTime);
 		fps = clamp(fps, 12, 60);
@@ -359,7 +360,7 @@ var app = app || {};
 	},
 
 	didLandSafely: function(rocket) {
-		var closestPeakIndex = Math.floor(rocket.position.x);
+		let closestPeakIndex = Math.floor(rocket.position.x);
 		closestPeakIndex -= closestPeakIndex % this.mountainIndex;
 		if(Math.abs(rocket.position.y - this.mountainPeaks[closestPeakIndex] - rocket.height) > this.landDifferential
 			&& Math.abs(rocket.position.x - this.target.x) < 50 ) {
@@ -374,8 +375,8 @@ var app = app || {};
 	},
 
 	checkForCollisions: function(rocket) {
-		for(var i = 0; i < 3; i ++) {
-			var index = Math.floor(rocket.position.x) - (Math.floor(rocket.position.x + 5 * i) % 5)
+		for(let i = 0; i < 3; i ++) {
+			let index = Math.floor(rocket.position.x) - (Math.floor(rocket.position.x + 5 * i) % 5)
 			if(Math.abs(rocket.position.y + rocket.height - this.mountainPeaks[index]) < this.landDifferential ||rocket.position.y + rocket.height > this.mountainPeaks[index]) {
 				return true;
 			}
@@ -484,8 +485,8 @@ var app = app || {};
 		} else {
 			this.ctx.moveTo(0, this.mountainPeaks[0]);
 		}
-		for (var x = 0; x < this.WIDTH; x+= this.mountainIndex) {
-			var noise = perlin(x, 50);
+		for (let x = 0; x < this.WIDTH; x+= this.mountainIndex) {
+			let noise = perlin(x, 50);
 			if(this.mode == this.GAME_MODE.SEA) {
 				x + this.mountainIndex < this.mountainPeaks.length
 				? this.ctx.quadraticCurveTo(x, this.mountainPeaks[x] ,x + this.mountainIndex, this.mountainPeaks[x + this.mountainIndex] )
@@ -533,7 +534,7 @@ var app = app || {};
 
 		if(this.mode == this.GAME_MODE.SEA) {
 			this.ctx.beginPath();
-			var size = 8 * this.mountainIndex;
+			let size = 8 * this.mountainIndex;
 			this.ctx.moveTo(this.target.x - size, this.mountainPeaks[this.target.x - size] + 10);
 			this.ctx.lineTo(this.target.x - size, this.mountainPeaks[this.target.x - size]);
 
@@ -688,7 +689,7 @@ var app = app || {};
 				radius: 100,
 				fuelBound: 1,
 			}
-			var fuelPercentage = app.rocket.fuelPercentage;
+			let fuelPercentage = app.rocket.fuelPercentage;
 			if(fuelPercentage < 0) {
 				fuelPercentage = 0;
 			}
@@ -696,11 +697,11 @@ var app = app || {};
 			this.uictx.beginPath();
 			this.uictx.moveTo(this.fuelIndicator.X ,
 							this.fuelIndicator.Y );
-			var targetRadian = map_range(fuelPercentage,
+			let targetRadian = map_range(fuelPercentage,
 											0, this.fuelIndicator.fuelBound,
 											0, Math.PI);
-			var dialX = this.fuelIndicator.X - this.fuelIndicator.radius * Math.cos(targetRadian);
-			var dialY = this.fuelIndicator.Y - this.fuelIndicator.radius * Math.sin(targetRadian);
+			let dialX = this.fuelIndicator.X - this.fuelIndicator.radius * Math.cos(targetRadian);
+			let dialY = this.fuelIndicator.Y - this.fuelIndicator.radius * Math.sin(targetRadian);
 			this.uictx.lineTo(dialX, dialY);
 			this.uictx.strokeStyle = "black";
 			this.uictx.stroke();
@@ -758,12 +759,12 @@ var app = app || {};
 			this.uictx.beginPath();
 			this.uictx.moveTo(this.velocityIndicator.X ,
 							this.velocityIndicator.Y );
-			var targetRadian = map_range(app.rocket.velocity.length(),
+			let targetRadian = map_range(app.rocket.velocity.length(),
 											0, this.velocityIndicator.speedBound,
 											0, Math.PI);
 			targetRadian = clamp(targetRadian, 0, Math.PI);
-			var dialX = this.velocityIndicator.X - this.velocityIndicator.radius * Math.cos(targetRadian);
-			var dialY = this.velocityIndicator.Y - this.velocityIndicator.radius * Math.sin(targetRadian);
+			let dialX = this.velocityIndicator.X - this.velocityIndicator.radius * Math.cos(targetRadian);
+			let dialY = this.velocityIndicator.Y - this.velocityIndicator.radius * Math.sin(targetRadian);
 			this.uictx.lineTo(dialX, dialY);
 			this.uictx.strokeStyle = "black";
 			this.uictx.stroke();
@@ -802,7 +803,7 @@ var app = app || {};
 	},
 
 	drawButtons: function() {
-		var seaX, seaY;
+		let seaX, seaY;
 		seaX = 35;
 		seaY = this.HEIGHT / 3 * 2;
 		this.ctx.drawImage(this.BUTTON_GRAPHICS.SEA, this.BUTTON_GRAPHICS.SEA_X, this.BUTTON_GRAPHICS.SEA_Y, this.BUTTON_GRAPHICS.SEA.width, this.BUTTON_GRAPHICS.SEA.height);
@@ -821,7 +822,7 @@ var app = app || {};
   },
 
 	doMouseDown: function(e) {
-		var mouse = getMouse(e);
+		let mouse = getMouse(e);
     this.ctx.font = "35px 'Press Start 2P'";
 		switch(this.state) {
 			case this.GAME_STATE.START:
@@ -881,8 +882,8 @@ var app = app || {};
 	 },
 
 	 processInputs: function(){
-		 var leftHandValue = app.inputHandler.handleOperands(app.inputHandler.leftHand.value);
-		 var rightHandValue = app.inputHandler.handleOperands(app.inputHandler.rightHand.value);
+		 let leftHandValue = app.inputHandler.handleOperands(app.inputHandler.leftHand.value);
+		 let rightHandValue = app.inputHandler.handleOperands(app.inputHandler.rightHand.value);
 
 		 switch(app.inputHandler.operator.value) {
 			 case"==":

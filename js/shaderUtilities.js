@@ -1,67 +1,67 @@
 "use strict";
 
-var texture;
+let texture;
 
-var canvas;
-var gl;
-var textureCanvas
-var triangles = new Float32Array([
+let canvas;
+let gl;
+let textureCanvas;
+const triangles = new Float32Array([
 		-1, -1,
 		1, -1,
 		-1, 1,
 		-1, 1,
 		1, -1,
 		1, 1
-	])
+	]);
 
-var edgeDetectKernel = [
+const edgeDetectKernel = [
 		-1,	-1,	-1,
 		-1,	8,	-1,
 		-1,	-1,	-1
-	]
+	];
 
-var embossKernel = [
+const embossKernel = [
 	2, 0, 0,
 	0, -1,0,
 	0, 0, -1
-]
+];
 
-var blurKernel = [
+const blurKernel = [
 	-1, 2, 1,
 	2, 4, 2,
 	1, 2, 1
-]
+];
 
-var sharpnessKernel = [
+const sharpnessKernel = [
 	-1,	-1, -1,
 	-1,	9,	-1,
 	-1,	-1,	-1
-]
+];
 
-var bottomSobelKernel = [
+const bottomSobelKernel = [
 	-1, -2, -1,
 	0, 0, 0,
 	1, 2, 1
-]
+];
 
-var defaultKernel = [
+const defaultKernel = [
 	0, 0, 0,
 	0, 1,0,
 	0, 0, 0
-]
+];
 
 
-var program;
+let program;
 
 function initWebGL(canvasID, glCanvasID) {
 	canvas = document.getElementById( glCanvasID );
 	gl = canvas.getContext( 'webgl' );
 
 	textureCanvas = document.getElementById( canvasID );
-	var textureCtx = textureCanvas.getContext( '2d' );
+	const textureCtx = textureCanvas.getContext('2d');
 
-	textureCanvas.width  = 1024,
-    textureCanvas.height = 1024
+	textureCanvas.width  = 1024;
+    textureCanvas.height = 1024;
 	textureCanvas.style.display = 'none';
 	canvas.width = textureCanvas.width;
 	canvas.height = textureCanvas.height;
@@ -70,7 +70,7 @@ function initWebGL(canvasID, glCanvasID) {
 	gl.viewport( 0, 0, gl.drawingBufferWidth * 2, gl.drawingBufferHeight * 2);
 
 	// Create a bugger object to store vertices
-	var buffer  = gl.createBuffer();
+	const buffer  = gl.createBuffer();
 
 	// point buffer at graphic context's ARRAY_BUFFER
 	gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
@@ -80,14 +80,14 @@ function initWebGL(canvasID, glCanvasID) {
 	gl.bufferData( gl.ARRAY_BUFFER, triangles, gl.STATIC_DRAW )
 
 	// create vertex shader
-	var vertexSource = vertex_shader; // from shader.js
-	var vertexShader = gl.createShader( gl.VERTEX_SHADER );
+	const vertexSource = vertex_shader; // from shader.js
+	const vertexShader = gl.createShader( gl.VERTEX_SHADER );
 	gl.shaderSource( vertexShader, vertexSource );
 	gl.compileShader( vertexShader );
 
 	// create fragment shader
-	var fragmentSource = fragment_shader; // from shader.js
-	var fragmentShader = gl.createShader( gl.FRAGMENT_SHADER );
+	const fragmentSource = fragment_shader; // from shader.js
+	const fragmentShader = gl.createShader( gl.FRAGMENT_SHADER );
 	gl.shaderSource( fragmentShader, fragmentSource );
 	gl.compileShader( fragmentShader);
 
@@ -98,7 +98,7 @@ function initWebGL(canvasID, glCanvasID) {
 	gl.linkProgram( program );
 	gl.useProgram( program );
 
-	var position = gl.getAttribLocation( program, 'aPosition' );
+	const position = gl.getAttribLocation( program, 'aPosition' );
 	gl.enableVertexAttribArray( position );
 	gl.vertexAttribPointer( position, 2, gl.FLOAT, false, 0, 0);
 
@@ -114,8 +114,8 @@ function initWebGL(canvasID, glCanvasID) {
 	program.textureSizeLocation = gl.getUniformLocation(program, "textureSize");
 	gl.uniform2f(program.textureSizeLocation, canvas.width, canvas.height);
 
-	var d = new Date();
-	var n = d.getMilliseconds();
+	const d = new Date();
+	const n = d.getMilliseconds();
 	program.time = gl.getUniformLocation(program, 'time');
 	gl.uniform1f(program.time, n);
 
@@ -155,8 +155,8 @@ function render() {
 
 		webGLSetup();
 
-		var d = new Date();
-		var n = d.getMilliseconds();
+		const d = new Date();
+		const n = d.getMilliseconds();
 		program.time = gl.getUniformLocation(program, 'time');
 		gl.uniform1f(program.time, n);
 
@@ -168,7 +168,7 @@ function render() {
 
 
 function computeKernelWeight(kernel) {
-   var weight = kernel.reduce(function(prev, curr) {
+   const weight = kernel.reduce((prev, curr) => {
        return prev + curr;
    });
    return weight <= 0 ? 1 : weight;
@@ -191,16 +191,16 @@ function shake(strength, duration) {
 	program.strength = gl.getUniformLocation(program, 'strength');
 	gl.uniform1f(program.strength, strength);
 
-	var countDown = function() {
+	const countDown = () => {
 		duration -= .1;
-		if(duration > 0) {
+		if (duration > 0) {
 			requestAnimationFrame(countDown);
 		} else {
 			program.shake = gl.getUniformLocation(program, 'shake');
 			gl.uniform1i(program.shake, 0);
 			assignKernel(defaultKernel);
 		}
-	}
+	};
 
 	countDown();
 }

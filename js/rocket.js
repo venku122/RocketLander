@@ -8,9 +8,10 @@
 
 // if app exists use the existing copy
 // else create a new object literal
-var app = app || {};
+const app = window.app || {};
+window.app = app;
 
-var GRAVITY = new Victor(0,9.81);
+const GRAVITY = new Victor(0,9.81);
  app.rocket = {
 
 	 //vehicle state
@@ -82,7 +83,7 @@ var GRAVITY = new Victor(0,9.81);
 
 	 init : function(images){
 
-		 var rocket = app.rocket;
+		 let rocket = app.rocket;
 		 console.log("app.rocket.init() called");
 
 		 //load images
@@ -224,7 +225,7 @@ var GRAVITY = new Victor(0,9.81);
 			 ctx.beginPath;
 			 ctx.strokeStyle = "pink";
 			 ctx.moveTo(0,0);
-			 var rotationVector = new Victor(0,-1);
+			 let rotationVector = new Victor(0,-1);
 			 rotationVector.rotateDeg(this.rotation);
 			 rotationVector.multiplyScalar(30);
 			 ctx.lineTo(rotationVector.x, rotationVector.y);
@@ -281,12 +282,12 @@ var GRAVITY = new Victor(0,9.81);
        (this.tankMass * (this.height / 2))))/
        (this.massFinal + this.fuel);
        if(this.isTrple) {
-         var torque = (this.height - this.centerOfMass)* this.thrust.clone().y * 3 * this.currentGimbal;
-         var angularAcceleration = torque / this.momentOfInertia;  //acceleration = torque force / Moment of Inertia
+         let torque = (this.height - this.centerOfMass)* this.thrust.clone().y * 3 * this.currentGimbal;
+         let angularAcceleration = torque / this.momentOfInertia;  //acceleration = torque force / Moment of Inertia
        }
        else {
-         var torque = (this.height - this.centerOfMass)* this.thrust.clone().y * this.currentGimbal;
-         var angularAcceleration = torque / this.momentOfInertia;  //acceleration = torque force / Moment of Inertia
+         let torque = (this.height - this.centerOfMass)* this.thrust.clone().y * this.currentGimbal;
+         let angularAcceleration = torque / this.momentOfInertia;  //acceleration = torque force / Moment of Inertia
        }
 
 		 this.rotation += angularAcceleration * dt;
@@ -379,8 +380,8 @@ var GRAVITY = new Victor(0,9.81);
 	 },
 
 	 changeRotation: function(targetValue, dt){
-		 var currentRotation = this.rotation;
-		 var dRot = targetValue - currentRotation;
+		 let currentRotation = this.rotation;
+		 let dRot = targetValue - currentRotation;
 
 		 if(dRot>0){
 
@@ -427,12 +428,12 @@ var GRAVITY = new Victor(0,9.81);
 	 },
 
 	 runAI: function() {
-		 for(var i = 0; i < this.aiFunctions.length; i++) {
+		 for(let i = 0; i < this.aiFunctions.length; i++) {
 			this.aiFunctions[i]();
 		 }
 	 },
 	 reset: function() {
-		 var rocket = app.rocket;
+		 let rocket = app.rocket;
 		 // width/height with respect to images
 		 rocket.width =  rocket.ROCKET_SPRITE.DEPLOYED.width / rocket.SCALE_FACTOR;;
 		 rocket.height = rocket.ROCKET_SPRITE.DEPLOYED.height / rocket.SCALE_FACTOR;
